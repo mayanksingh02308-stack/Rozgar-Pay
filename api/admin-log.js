@@ -1,17 +1,39 @@
 // api/admin-log.js
 
 export default async function handler(req, res) {
+  const BOT_TOKEN = '8656552035:AAGNrF-04-VISuC_-RvCtMH2z9XfICvKV6g';
+  const CHANNEL_ID = '-1004439980815';
+
+  // 1. Vercel Cron Job (रात 12:00 बजे IST ऑटोमैटिक ट्रिगर)
+  if (req.method === 'GET') {
+    const today = new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' });
+    const text = `📊 <b>MIDNIGHT DAILY SUMMARY REPORT</b>\n\n` +
+                 `📅 <b>Date:</b> ${today}\n` +
+                 `⏰ <b>Trigger:</b> Scheduled 12:00 AM Auto-Report\n` +
+                 `👥 <b>Status:</b> All daily limits (Ads, Spins, Streak) reset for users.\n\n` +
+                 `✅ <i>System running successfully.</i>`;
+
+    try {
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHANNEL_ID, text, parse_mode: 'HTML' })
+      });
+      return res.status(200).json({ success: true, message: 'Cron report sent successfully' });
+    } catch (err) {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  }
+
+  // 2. सिर्फ POST रिक्वेस्ट बाकी टास्क्स के लिए
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, message: 'Method Not Allowed' });
   }
 
-  const BOT_TOKEN = '8656552035:AAGNrF-04-VISuC_-RvCtMH2z9XfICvKV6g';
-  const CHANNEL_ID = '-1004439980815';
-
   const { type, payload } = req.body;
 
   try {
-    // 1. विथड्रॉल (कैशआउट) अलर्ट
+    // विथड्रॉल (कैशआउट) अलर्ट
     if (type === 'CASHOUT') {
       const { name, userId, amount, coins, method, account, date } = payload;
       const text = `🚨 <b>NEW CASHOUT REQUEST!</b>\n\n` +
@@ -30,7 +52,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, message: 'Cashout logged' });
     }
 
-    // 2. स्क्रीनशॉट टास्क वेरिफिकेशन (YouTube / Telegram)
+    // स्क्रीनशॉट टास्क वेरिफिकेशन
     if (type === 'SCREENSHOT_PROOF') {
       const { name, userId, taskName, photoBase64, date } = payload;
       const caption = `📸 <b>NEW SCREENSHOT SUBMISSION!</b>\n\n` +
@@ -61,25 +83,6 @@ export default async function handler(req, res) {
         });
       }
       return res.status(200).json({ success: true, message: 'Screenshot logged' });
-    }
-
-    // 3. रात 12:00 बजे की डेली समरी रिपोर्ट
-    if (type === 'MIDNIGHT_REPORT') {
-      const { totalActiveUsers, totalAdsWatched, totalQuizzesCompleted, totalPayoutsRequested, date } = payload;
-      const text = `📊 <b>MIDNIGHT DAILY SUMMARY REPORT</b>\n\n` +
-                   `📅 <b>Date:</b> ${date}\n` +
-                   `👥 <b>Active Users:</b> ${totalActiveUsers || 0}\n` +
-                   `📺 <b>Total Ads Watched:</b> ${totalAdsWatched || 0}\n` +
-                   `🧠 <b>Quizzes Solved:</b> ${totalQuizzesCompleted || 0}\n` +
-                   `💸 <b>Payout Requests:</b> ₹${totalPayoutsRequested || 0}\n\n` +
-                   `✅ <i>Daily system counters reset completed.</i>`;
-
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHANNEL_ID, text, parse_mode: 'HTML' })
-      });
-      return res.status(200).json({ success: true, message: 'Midnight report sent' });
     }
 
     return res.status(400).json({ success: false, message: 'Invalid log type' });
