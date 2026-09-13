@@ -1,0 +1,9 @@
+{
+  "crons": [
+    {
+      "path": "/api/admin-log",
+      "schedule": "30 18 * * *"
+    }
+  ]
+}
+
