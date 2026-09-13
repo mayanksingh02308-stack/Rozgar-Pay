@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rozgar Pay - Daily Rewards</title>
+  <title>Rozgar Pay - Official</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { -webkit-tap-highlight-color: transparent; user-select: none; font-family: system-ui, sans-serif; }
+    body { -webkit-tap-highlight-color: transparent; user-select: none; font-family: system-ui, -apple-system, sans-serif; }
     .screen-view { display: none; }
     .screen-view.active { display: block; }
     .scratch-canvas { touch-action: none; }
@@ -16,117 +16,146 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen pb-20">
 
   <!-- TOP HEADER -->
-  <header class="sticky top-0 z-50 bg-slate-900/95 border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+  <header class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-emerald-500 flex items-center justify-center font-bold text-slate-950 text-base">₹</div>
+      <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-400 via-emerald-500 to-teal-400 flex items-center justify-center font-extrabold text-slate-950 text-lg shadow-lg shadow-emerald-500/20">₹</div>
       <div>
-        <h1 class="text-xs font-bold text-white leading-tight" id="userName">User</h1>
-        <p class="text-[9px] text-slate-400 font-mono">ID: <span id="userId">...</span></p>
+        <h1 class="text-xs font-bold text-white flex items-center gap-1.5" id="userName">User</h1>
+        <p class="text-[9px] text-slate-400 font-mono">UID: <span id="userId">...</span></p>
       </div>
     </div>
-    <div class="bg-slate-950 border border-slate-800 rounded-full px-3 py-1 flex items-center gap-2.5 font-mono text-xs">
+    <div class="bg-slate-950/80 border border-slate-800 rounded-full px-3 py-1 flex items-center gap-2.5 font-mono text-xs shadow-inner">
       <span class="text-amber-400 font-bold">🪙 <span id="userCoins">100</span></span>
-      <span class="text-slate-600">|</span>
+      <span class="text-slate-700">|</span>
       <span class="text-emerald-400 font-bold">₹<span id="userRupees">1.00</span></span>
     </div>
   </header>
 
-  <!-- TOAST -->
+  <!-- TOAST MESSAGE -->
   <div id="toastBox" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300">
     <div id="toastMsg" class="bg-emerald-500 text-slate-950 px-4 py-1.5 rounded-full text-xs font-bold shadow-lg shadow-emerald-500/20"></div>
   </div>
 
-  <main class="max-w-md mx-auto p-4">
+  <main class="max-w-md mx-auto p-4 space-y-4">
 
     <!-- 1. HOME SCREEN -->
     <div id="screen-home" class="screen-view active space-y-4">
-      <!-- 90-DAY DAILY STREAK -->
-      <div class="bg-gradient-to-r from-amber-500/20 to-emerald-500/20 border border-emerald-500/30 rounded-2xl p-4">
+      
+      <!-- 90-DAY DAILY STREAK BANNER -->
+      <div class="relative overflow-hidden bg-gradient-to-br from-indigo-950 via-slate-900 to-emerald-950 border border-emerald-500/40 rounded-2xl p-4 shadow-xl">
         <div class="flex justify-between items-center mb-1">
-          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-            Day <span id="streakDay">1</span> / 90
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+            Day <span id="streakDay">1</span> / 90 Streak
           </span>
-          <span class="text-xs text-amber-400 font-bold">+<span id="streakReward">5</span> Coins Today</span>
+          <span class="text-xs text-amber-400 font-bold font-mono">+<span id="streakReward">5</span> Coins</span>
         </div>
-        <h2 class="text-sm font-bold text-white">90-Day Daily Streak</h2>
-        <p class="text-[11px] text-slate-400 mb-3">हर रोज़ बढ़ते क्रम में कॉइन्स मिलेंगे! 90 दिन बाद चक्र फिर से शुरू होगा।</p>
-        <button id="claimStreakBtn" onclick="claimDailyStreak()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 rounded-xl text-xs active:scale-95 transition">
+        <h2 class="text-sm font-extrabold text-white mt-1">90-Day Daily Streak</h2>
+        <p class="text-[11px] text-slate-400 mb-3">हर रोज़ बढ़ते क्रम में कॉइन! 90 दिन बाद चक्र फिर से Day 1 से शुरू होगा।</p>
+        <button id="claimStreakBtn" onclick="claimDailyStreak()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold py-2 rounded-xl text-xs active:scale-95 transition shadow-lg shadow-emerald-500/20">
           Claim Today's Bonus 🎁
         </button>
       </div>
 
-      <!-- MAIN HUB MENU -->
+      <!-- MAIN HUB ICONS -->
       <div class="grid grid-cols-2 gap-3">
-        <button onclick="openScreen('watch-ads')" class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-left hover:border-emerald-500/50 transition">
-          <span class="text-2xl">📺</span>
-          <h3 class="text-xs font-bold text-white mt-2">Watch Ads</h3>
-          <p class="text-[10px] text-slate-400">15s Timer & Milestones</p>
+        <button onclick="openScreen('watch-ads')" class="bg-gradient-to-br from-rose-950/40 to-slate-900 border border-rose-500/30 p-4 rounded-2xl text-left hover:border-rose-500 transition shadow-lg">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-xl mb-2">📺</div>
+          <h3 class="text-xs font-bold text-white">Watch Ads</h3>
+          <p class="text-[10px] text-rose-300 font-medium mt-0.5">15s Timer (10 Coins)</p>
         </button>
-        <button onclick="openScreen('spin')" class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-left hover:border-emerald-500/50 transition">
-          <span class="text-2xl">🎡</span>
-          <h3 class="text-xs font-bold text-white mt-2">Daily Spin</h3>
-          <p class="text-[10px] text-slate-400">5 Spins (5-20 Coins)</p>
+
+        <button onclick="openScreen('spin')" class="bg-gradient-to-br from-amber-950/40 to-slate-900 border border-amber-500/30 p-4 rounded-2xl text-left hover:border-amber-500 transition shadow-lg">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-xl mb-2">🎡</div>
+          <h3 class="text-xs font-bold text-white">Daily Spin</h3>
+          <p class="text-[10px] text-amber-300 font-medium mt-0.5">5 Spins (5-20 Coins)</p>
         </button>
-        <button onclick="openScreen('scratch')" class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-left hover:border-emerald-500/50 transition">
-          <span class="text-2xl">✨</span>
-          <h3 class="text-xs font-bold text-white mt-2">Scratch Card</h3>
-          <p class="text-[10px] text-slate-400">5 Scratch (5-20 Coins)</p>
+
+        <button onclick="openScreen('scratch')" class="bg-gradient-to-br from-purple-950/40 to-slate-900 border border-purple-500/30 p-4 rounded-2xl text-left hover:border-purple-500 transition shadow-lg">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-xl mb-2">✨</div>
+          <h3 class="text-xs font-bold text-white">Scratch Card</h3>
+          <p class="text-[10px] text-purple-300 font-medium mt-0.5">5 Cards (5-20 Coins)</p>
         </button>
-        <button onclick="openScreen('quizzes')" class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-left hover:border-emerald-500/50 transition">
-          <span class="text-2xl">🧠</span>
-          <h3 class="text-xs font-bold text-white mt-2">Play Quizzes</h3>
-          <p class="text-[10px] text-slate-400">Math, GK, Animation, Puzzle</p>
+
+        <button onclick="openScreen('quizzes')" class="bg-gradient-to-br from-sky-950/40 to-slate-900 border border-sky-500/30 p-4 rounded-2xl text-left hover:border-sky-500 transition shadow-lg">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-xl mb-2">🧠</div>
+          <h3 class="text-xs font-bold text-white">Play Quizzes</h3>
+          <p class="text-[10px] text-sky-300 font-medium mt-0.5">Math, GK, Anime, Puzzle</p>
         </button>
       </div>
 
-      <!-- SOCIAL TASKS & OFFICIAL LINKS -->
+      <!-- LEADERBOARD SECTION -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
-        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Social Tasks & Channels</h3>
+        <div class="flex justify-between items-center">
+          <h3 class="text-xs font-bold text-amber-400 flex items-center gap-1.5">🏆 Top Earner Leaderboard</h3>
+          <span class="text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">Live Demo</span>
+        </div>
+        <div class="space-y-1.5 text-xs">
+          <div class="flex items-center justify-between p-2 bg-slate-950 rounded-xl border border-slate-800/80">
+            <span class="flex items-center gap-2">🥇 <span class="font-bold text-white">Rahul K.</span></span>
+            <span class="font-mono text-amber-300 font-bold">14,250 Coins</span>
+          </div>
+          <div class="flex items-center justify-between p-2 bg-slate-950 rounded-xl border border-slate-800/80">
+            <span class="flex items-center gap-2">🥈 <span class="font-bold text-white">Aman S.</span></span>
+            <span class="font-mono text-amber-300 font-bold">11,900 Coins</span>
+          </div>
+          <div class="flex items-center justify-between p-2 bg-slate-950 rounded-xl border border-slate-800/80">
+            <span class="flex items-center gap-2">🥉 <span class="font-bold text-white">Pooja M.</span></span>
+            <span class="font-mono text-amber-300 font-bold">9,420 Coins</span>
+          </div>
+          <div class="flex items-center justify-between p-2 bg-emerald-950/30 border border-emerald-500/30 rounded-xl">
+            <span class="flex items-center gap-2 font-bold text-emerald-400">🎖️ You (<span id="userRankName">User</span>)</span>
+            <span class="font-mono text-emerald-300 font-bold"><span id="leaderboardUserCoins">100</span> Coins</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOCIAL MEDIA TASKS -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Social Tasks & Proofs</h3>
         
-        <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-800/80">
+        <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-800">
           <div>
             <p class="text-xs font-bold text-white">Subscribe YouTube</p>
             <p class="text-[10px] text-slate-400">+50 Coins (Upload Proof)</p>
           </div>
-          <button onclick="openScreenshotModal('YouTube Task', 'https://www.youtube.com/@Rewardnet')" class="text-xs bg-red-600 hover:bg-red-500 text-white font-bold px-3 py-1.5 rounded-lg">Join & Proof</button>
+          <button onclick="openProofModal('YouTube Task', 'https://www.youtube.com/@Rewardnet')" class="text-xs bg-red-600 hover:bg-red-500 text-white font-bold px-3 py-1.5 rounded-lg">Join & Proof</button>
         </div>
 
-        <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-800/80">
+        <div class="flex items-center justify-between p-2.5 bg-slate-950 rounded-xl border border-slate-800">
           <div>
             <p class="text-xs font-bold text-white">Join Telegram Proofs</p>
             <p class="text-[10px] text-slate-400">+50 Coins (Upload Proof)</p>
           </div>
-          <button onclick="openScreenshotModal('Telegram Task', 'https://t.me/RozgarPayProofs')" class="text-xs bg-sky-500 hover:bg-sky-400 text-white font-bold px-3 py-1.5 rounded-lg">Join & Proof</button>
+          <button onclick="openProofModal('Telegram Task', 'https://t.me/RozgarPayProofs')" class="text-xs bg-sky-500 hover:bg-sky-400 text-white font-bold px-3 py-1.5 rounded-lg">Join & Proof</button>
         </div>
 
-        <a href="https://t.me/RozgarPayProofs" target="_blank" class="block text-center text-xs text-emerald-400 py-1 font-medium hover:underline">
-          📢 View Live Payment Proofs Channel
+        <a href="https://t.me/RozgarPayProofs" target="_blank" class="block text-center text-xs text-emerald-400 pt-1 font-medium hover:underline">
+          📢 View Official Payout Proofs Channel
         </a>
       </div>
     </div>
-
-    <!-- 2. WATCH ADS SCREEN -->
+        <!-- 2. WATCH ADS SCREEN -->
     <div id="screen-watch-ads" class="screen-view space-y-4">
       <button onclick="openScreen('home')" class="text-xs text-slate-400 flex items-center gap-1 mb-2">← Back to Home</button>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center">
-        <h3 class="text-sm font-bold text-white">Watch Video Ad</h3>
-        <p class="text-[11px] text-slate-400 mb-4">15 सेकंड का वीडियो विज्ञापन देखकर 20 कॉइन्स प्राप्त करें।</p>
-        <button id="btnWatchAd" onclick="startAdTimer()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-xs active:scale-95">
-          Watch Video Ad (+20 Coins)
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center">
+        <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 text-2xl flex items-center justify-center mx-auto mb-3">📺</div>
+        <h3 class="text-sm font-bold text-white">Watch Video Advertisement</h3>
+        <p class="text-xs text-slate-400 mb-4">पूरे 15 सेकंड देखने पर 10 कॉइन तुरंत जुड़ेंगे।</p>
+        <button id="btnWatchAd" onclick="startAdTimer()" class="w-full bg-rose-500 hover:bg-rose-400 text-white font-bold py-3 rounded-xl text-xs active:scale-95 transition">
+          Watch Video Ad (+10 Coins)
         </button>
         <div id="adTimerBox" class="mt-3 hidden">
           <p class="text-xs text-amber-400 font-mono">कृपया प्रतीक्षा करें: <span id="adSeconds">15</span>s</p>
         </div>
       </div>
 
-      <!-- MILESTONES -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
         <h4 class="text-xs font-bold text-slate-300 uppercase">Ad Milestones</h4>
-        <div class="flex justify-between items-center text-xs p-2 bg-slate-950 rounded-lg"><span>100 Ads (+100 Coins)</span><span id="m-100" class="text-slate-500">Locked</span></div>
-        <div class="flex justify-between items-center text-xs p-2 bg-slate-950 rounded-lg"><span>200 Ads (+300 Coins)</span><span id="m-200" class="text-slate-500">Locked</span></div>
-        <div class="flex justify-between items-center text-xs p-2 bg-slate-950 rounded-lg"><span>500 Ads (+750 Coins)</span><span id="m-500" class="text-slate-500">Locked</span></div>
-        <div class="flex justify-between items-center text-xs p-2 bg-slate-950 rounded-lg"><span>1000 Ads (+1250 Coins)</span><span id="m-1000" class="text-slate-500">Locked</span></div>
-        <div class="flex justify-between items-center text-xs p-2 bg-slate-950 rounded-lg"><span>3000 Ads (+5000 Coins)</span><span id="m-3000" class="text-slate-500">Locked</span></div>
+        <div class="flex justify-between items-center text-xs p-2.5 bg-slate-950 rounded-xl"><span>100 Ads</span><span class="text-amber-400 font-bold">+100 Coins</span></div>
+        <div class="flex justify-between items-center text-xs p-2.5 bg-slate-950 rounded-xl"><span>200 Ads</span><span class="text-amber-400 font-bold">+300 Coins</span></div>
+        <div class="flex justify-between items-center text-xs p-2.5 bg-slate-950 rounded-xl"><span>500 Ads</span><span class="text-amber-400 font-bold">+750 Coins</span></div>
+        <div class="flex justify-between items-center text-xs p-2.5 bg-slate-950 rounded-xl"><span>1000 Ads</span><span class="text-amber-400 font-bold">+1,250 Coins</span></div>
+        <div class="flex justify-between items-center text-xs p-2.5 bg-slate-950 rounded-xl"><span>3000 Ads</span><span class="text-amber-400 font-bold">+5,000 Coins</span></div>
       </div>
     </div>
 
@@ -135,12 +164,12 @@
       <button onclick="openScreen('home')" class="text-xs text-slate-400 flex items-center gap-1 mb-2">← Back to Home</button>
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
         <h3 class="text-sm font-bold text-white mb-1">Daily Lucky Spin</h3>
-        <p class="text-[11px] text-slate-400 mb-3">Daily Limit: <span id="spinsLeft" class="font-mono text-amber-400">5</span> left (5-20 Coins)</p>
+        <p class="text-[11px] text-slate-400 mb-3">Daily Limit: <span id="spinsLeft" class="font-mono text-amber-400 font-bold">5</span> left (5-20 C / Better Luck)</p>
         <div class="relative w-64 h-64 mx-auto mb-4 flex items-center justify-center">
-          <div class="absolute -top-2 z-10 text-emerald-400 text-2xl">▼</div>
+          <div class="absolute -top-2 z-10 text-amber-400 text-2xl">▼</div>
           <canvas id="spinCanvas" width="250" height="250" class="rounded-full shadow-lg border-4 border-slate-800"></canvas>
         </div>
-        <button id="btnSpin" onclick="playSpin()" class="w-full bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs active:scale-95">SPIN NOW</button>
+        <button id="btnSpin" onclick="playSpin()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs active:scale-95">SPIN NOW</button>
       </div>
     </div>
 
@@ -148,10 +177,10 @@
     <div id="screen-scratch" class="screen-view space-y-4 text-center">
       <button onclick="openScreen('home')" class="text-xs text-slate-400 flex items-center gap-1 mb-2">← Back to Home</button>
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-        <h3 class="text-sm font-bold text-white mb-1">Scratch & Earn</h3>
-        <p class="text-[11px] text-slate-400 mb-3">Daily Cards: <span id="scratchLeft" class="font-mono text-amber-400">5</span> left (5-20 Coins)</p>
+        <h3 class="text-sm font-bold text-white mb-1">Scratch & Win</h3>
+        <p class="text-[11px] text-slate-400 mb-3">Daily Cards: <span id="scratchLeft" class="font-mono text-purple-400 font-bold">5</span> left (5-20 C / Try Again)</p>
         <div class="relative w-64 h-32 mx-auto mb-3 border border-slate-700 rounded-xl overflow-hidden bg-slate-950 flex items-center justify-center">
-          <p id="scratchRewardText" class="text-lg font-bold text-amber-400">+15 COINS!</p>
+          <p id="scratchRewardText" class="text-base font-bold text-amber-400">+15 COINS!</p>
           <canvas id="scratchCanvas" width="256" height="128" class="scratch-canvas absolute top-0 left-0 w-full h-full cursor-pointer"></canvas>
         </div>
         <button onclick="resetScratch()" class="text-xs text-slate-400 underline">Get Next Card</button>
@@ -162,32 +191,34 @@
     <div id="screen-quizzes" class="screen-view space-y-4">
       <button onclick="openScreen('home')" class="text-xs text-slate-400 flex items-center gap-1 mb-2">← Back to Home</button>
       <div class="grid grid-cols-2 gap-3">
-        <button onclick="startQuiz('Math')" class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-left">
+        <button onclick="loadQuiz('Math')" class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-left hover:border-emerald-500 transition">
           <span class="text-2xl">➕</span>
           <h4 class="text-xs font-bold text-white mt-1">Math Quiz</h4>
-          <p class="text-[10px] text-slate-400">10 Daily (10-50 C)</p>
+          <p class="text-[10px] text-emerald-400">10 Daily (+10 Coins)</p>
         </button>
-        <button onclick="startQuiz('GK')" class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-left">
+        <button onclick="loadQuiz('GK')" class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-left hover:border-sky-500 transition">
           <span class="text-2xl">🌍</span>
           <h4 class="text-xs font-bold text-white mt-1">GK Quiz</h4>
-          <p class="text-[10px] text-slate-400">10 Daily (10-50 C)</p>
+          <p class="text-[10px] text-sky-400">General Knowledge (+10 Coins)</p>
         </button>
-        <button onclick="startQuiz('Animation')" class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-left">
+        <button onclick="loadQuiz('Animation')" class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-left hover:border-purple-500 transition">
           <span class="text-2xl">🎬</span>
           <h4 class="text-xs font-bold text-white mt-1">Animation Quiz</h4>
-          <p class="text-[10px] text-slate-400">Visual Tasks</p>
+          <p class="text-[10px] text-purple-400">Cartoons & Anime (+10 Coins)</p>
         </button>
-        <button onclick="startQuiz('Puzzle')" class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-left">
+        <button onclick="loadQuiz('Puzzle')" class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-left hover:border-amber-500 transition">
           <span class="text-2xl">🧩</span>
           <h4 class="text-xs font-bold text-white mt-1">Puzzle Game</h4>
-          <p class="text-[10px] text-slate-400">Number Grid</p>
+          <p class="text-[10px] text-amber-400">Logic & Riddles (+10 Coins)</p>
         </button>
       </div>
 
-      <!-- ACTIVE QUIZ BOX -->
       <div id="activeQuizCard" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 hidden">
-        <h4 id="quizTitle" class="text-sm font-bold text-white mb-2">Quiz</h4>
-        <p id="quizQuestion" class="text-xs text-slate-300 font-mono mb-4">5 + 7 = ?</p>
+        <div class="flex justify-between items-center mb-2">
+          <h4 id="quizTitle" class="text-xs font-bold text-white">Quiz Question</h4>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold">+10 Coins</span>
+        </div>
+        <p id="quizQuestion" class="text-xs text-slate-200 font-medium mb-4">Question loading...</p>
         <div id="quizOptions" class="grid grid-cols-2 gap-2"></div>
       </div>
     </div>
@@ -195,8 +226,8 @@
     <!-- 6. REFERRAL SCREEN -->
     <div id="screen-refer" class="screen-view space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-        <h3 class="text-sm font-bold text-white">Refer & Commission Engine</h3>
-        <p class="text-xs text-slate-400">दोनों को 100 कॉइन मिलेंगे! 1-50 रेफरल पर 10% और 51-100+ पर 50% कमीशन मिलेगा।</p>
+        <h3 class="text-sm font-bold text-white">Refer & Commission Hub</h3>
+        <p class="text-xs text-slate-400">हर रेफरल पर दोनों को 100 कॉइन। 1-50 पर 10% और 51-100+ पर 50% लाइफटाइम कमीशन।</p>
         <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-xs font-mono text-slate-400 truncate" id="refLinkText">...</div>
         <div class="flex gap-2">
           <button onclick="copyRefLink()" class="flex-1 bg-slate-800 hover:bg-slate-700 py-2 rounded-xl text-xs font-bold">Copy Link</button>
@@ -210,13 +241,13 @@
       </div>
     </div>
 
-    <!-- 7. WALLET & CASHOUT SCREEN -->
+    <!-- 7. WALLET SCREEN -->
     <div id="screen-wallet" class="screen-view space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-        <h3 class="text-sm font-bold text-white">Withdrawal Methods</h3>
+        <h3 class="text-sm font-bold text-white">Withdraw Rewards</h3>
         <div>
-          <label class="text-[11px] text-slate-400 block mb-1">Select Payout Option</label>
-          <select id="payoutMethodSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+          <label class="text-[11px] text-slate-400 block mb-1">Select Method</label>
+          <select id="payoutMethodSelect" onchange="renderPayoutFields()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
             <option value="UPI">UPI Transfer</option>
             <option value="Bank">Bank Transfer</option>
             <option value="Amazon">Amazon Gift Card</option>
@@ -224,35 +255,30 @@
             <option value="Flipkart">Flipkart Gift Card</option>
           </select>
         </div>
-        <div>
-          <label class="text-[11px] text-slate-400 block mb-1">UPI ID / Account / Email</label>
-          <input type="text" id="payoutAccountInput" placeholder="Enter details..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
-        </div>
+
+        <div id="dynamicFieldsContainer" class="space-y-2"></div>
+
         <div>
           <label class="text-[11px] text-slate-400 block mb-1">Select Amount</label>
-          <select id="payoutAmountSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
-            <option value="10">₹10 (1,000 Coins)</option>
-            <option value="25">₹25 (2,500 Coins)</option>
-            <option value="50">₹50 (5,000 Coins)</option>
-            <option value="100">₹100 (10,000 Coins)</option>
-          </select>
+          <select id="payoutAmountSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"></select>
         </div>
-        <button id="btnWithdraw" onclick="submitCashout()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-xs active:scale-95">
+
+        <button id="btnWithdraw" onclick="submitCashout()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-xs active:scale-95 transition shadow-lg shadow-emerald-500/20">
           Submit Cashout
         </button>
       </div>
     </div>
 
-    <!-- 8. USER PASSBOOK / HISTORY SCREEN -->
+    <!-- 8. PASSBOOK SCREEN -->
     <div id="screen-history" class="screen-view space-y-3">
-      <h3 class="text-sm font-bold text-white">Personal Activity Passbook</h3>
+      <h3 class="text-sm font-bold text-white">Personal Activity History</h3>
       <div id="historyList" class="space-y-2"></div>
     </div>
 
   </main>
 
   <!-- BOTTOM NAVBAR -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900 border-t border-slate-800 flex justify-around py-2 max-w-md mx-auto">
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur border-t border-slate-800 flex justify-around py-2 max-w-md mx-auto">
     <button onclick="openScreen('home')" class="text-center text-emerald-400"><span class="text-base block">🏠</span><span class="text-[9px]">Home</span></button>
     <button onclick="openScreen('quizzes')" class="text-center text-slate-400"><span class="text-base block">🎮</span><span class="text-[9px]">Games</span></button>
     <button onclick="openScreen('refer')" class="text-center text-slate-400"><span class="text-base block">👥</span><span class="text-[9px]">Refer</span></button>
@@ -260,20 +286,20 @@
     <button onclick="openScreen('history')" class="text-center text-slate-400"><span class="text-base block">📜</span><span class="text-[9px]">History</span></button>
   </nav>
 
-  <!-- SCREENSHOT PROOF MODAL -->
+  <!-- PROOF MODAL -->
   <div id="proofModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 w-full max-w-xs space-y-3">
       <h4 id="proofTitle" class="text-sm font-bold text-white">Task Proof</h4>
-      <p class="text-xs text-slate-400">चैनल जॉइन करके स्क्रीनशॉट चुनें और अपलोड करें। एडमिन अप्रूवल के बाद 50 कॉइन मिलेंगे।</p>
+      <p class="text-xs text-slate-400">स्क्रीनशॉट चुनें और सबमिट करें। चैनल में एडमिन अप्रूव करने पर 50 कॉइन मिलेंगे।</p>
       <input type="file" id="proofFileInput" accept="image/*" class="text-xs text-slate-400 w-full" />
       <div class="flex gap-2">
         <button onclick="closeProofModal()" class="flex-1 bg-slate-800 py-2 rounded-xl text-xs">Cancel</button>
         <button onclick="uploadProofScreenshot()" class="flex-1 bg-emerald-500 text-slate-950 font-bold py-2 rounded-xl text-xs">Submit</button>
       </div>
     </div>
-            </div>
-    <script>
-    // --- TELEGRAM & USER SETUP ---
+  </div>
+   <script>
+    // --- USER & TG INIT ---
     let tgUser = null;
     try {
       if (window.Telegram && window.Telegram.WebApp) {
@@ -286,19 +312,23 @@
     const USER_NAME = tgUser?.first_name ? `${tgUser.first_name} ${tgUser.last_name || ''}`.trim() : 'Abhitosh Patel';
 
     document.getElementById('userName').innerText = USER_NAME;
+    document.getElementById('userRankName').innerText = USER_NAME;
     document.getElementById('userId').innerText = USER_ID;
     document.getElementById('refLinkText').innerText = `https://t.me/RozgarPayProofs?start=${USER_ID}`;
 
-    // --- STATE MANAGEMENT ---
-    let coins = parseInt(localStorage.getItem('rp_coins') || '100'); // 100 Welcome Bonus
+    // --- STATE VARIABLES ---
+    let coins = parseInt(localStorage.getItem('rp_coins') || '100');
     let streakDay = parseInt(localStorage.getItem('rp_streak_day') || '1');
     let adsCount = parseInt(localStorage.getItem('rp_ads_count') || '0');
     let spinsLeft = parseInt(localStorage.getItem('rp_spins_left') || '5');
     let scratchLeft = parseInt(localStorage.getItem('rp_scratch_left') || '5');
+    let quizzesCount = parseInt(localStorage.getItem('rp_quiz_count') || '0');
+    let cashoutDoneCount = parseInt(localStorage.getItem('rp_cashout_count') || '0');
     let currentTaskName = '';
 
     function syncState() {
       document.getElementById('userCoins').innerText = coins;
+      document.getElementById('leaderboardUserCoins').innerText = coins;
       document.getElementById('userRupees').innerText = (coins / 100).toFixed(2);
       document.getElementById('streakDay').innerText = streakDay;
       document.getElementById('streakReward').innerText = streakDay * 5;
@@ -310,6 +340,9 @@
       localStorage.setItem('rp_ads_count', adsCount);
       localStorage.setItem('rp_spins_left', spinsLeft);
       localStorage.setItem('rp_scratch_left', scratchLeft);
+      localStorage.setItem('rp_quiz_count', quizzesCount);
+      localStorage.setItem('rp_cashout_count', cashoutDoneCount);
+      renderWithdrawalOptions();
     }
 
     function showToast(msg) {
@@ -321,14 +354,13 @@
 
     function addHistory(title, amount, status = 'Credit') {
       const history = JSON.parse(localStorage.getItem('rp_history') || '[]');
-      const entry = {
+      history.unshift({
         title,
         amount,
         status,
         time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
         date: new Date().toLocaleDateString('en-IN')
-      };
-      history.unshift(entry);
+      });
       localStorage.setItem('rp_history', JSON.stringify(history));
       renderHistory();
     }
@@ -354,7 +386,6 @@
       `).join('');
     }
 
-    // --- NAVIGATION ---
     function openScreen(screenId) {
       document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
       const target = document.getElementById(`screen-${screenId}`);
@@ -363,34 +394,25 @@
       if (screenId === 'spin') drawSpinWheel();
       if (screenId === 'scratch') initScratch();
       if (screenId === 'history') renderHistory();
+      if (screenId === 'wallet') renderPayoutFields();
     }
 
-    // --- 90-DAY DAILY STREAK ---
+    // --- 90-DAY STREAK ---
     function claimDailyStreak() {
       const lastDate = localStorage.getItem('rp_last_streak_date');
       const today = new Date().toDateString();
-
-      if (lastDate === today) {
-        showToast('⚠️ Already claimed today!');
-        return;
-      }
+      if (lastDate === today) return showToast('⚠️ Already claimed today!');
 
       const reward = streakDay * 5;
       coins += reward;
       addHistory(`Day ${streakDay} Streak Bonus`, reward);
-
-      if (streakDay >= 90) {
-        streakDay = 1;
-      } else {
-        streakDay += 1;
-      }
-
+      streakDay = (streakDay >= 90) ? 1 : streakDay + 1;
       localStorage.setItem('rp_last_streak_date', today);
       syncState();
       showToast(`🎁 Claimed Day Bonus: +${reward} Coins!`);
     }
 
-    // --- 15-SECOND AD TIMER ---
+    // --- 15-SECOND WATCH AD (10 COINS) ---
     function startAdTimer() {
       const btn = document.getElementById('btnWatchAd');
       const timerBox = document.getElementById('adTimerBox');
@@ -412,44 +434,50 @@
           btn.disabled = false;
           btn.classList.remove('opacity-50');
 
-          coins += 20;
+          coins += 10;
           adsCount++;
-          addHistory('Watch Video Ad (15s)', 20);
+          addHistory('Watch Ad (15s)', 10);
           syncState();
-          showToast('✓ Ad finished! +20 Coins received.');
+          showToast('✓ Ad finished! +10 Coins credited.');
         }
       }, 1000);
     }
 
     // --- SPIN WHEEL ---
-    const wheelRewards = [5, 10, 15, 20, 10, 15];
-    const wheelColors = ['#0f766e', '#0369a1', '#d97706', '#15803d', '#9333ea', '#475569'];
+    const wheelSegments = [
+      { text: '5 C', val: 5, color: '#0f766e' },
+      { text: '10 C', val: 10, color: '#0284c7' },
+      { text: 'Try Again', val: 0, color: '#475569' },
+      { text: '15 C', val: 15, color: '#d97706' },
+      { text: '20 C', val: 20, color: '#16a34a' },
+      { text: 'Try Again', val: 0, color: '#475569' }
+    ];
     let spinAngle = 0;
 
     function drawSpinWheel() {
       const canvas = document.getElementById('spinCanvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      const arc = (2 * Math.PI) / wheelRewards.length;
+      const arc = (2 * Math.PI) / wheelSegments.length;
 
       ctx.clearRect(0, 0, 250, 250);
       ctx.save();
       ctx.translate(125, 125);
       ctx.rotate(spinAngle);
 
-      for (let i = 0; i < wheelRewards.length; i++) {
+      for (let i = 0; i < wheelSegments.length; i++) {
         ctx.beginPath();
-        ctx.fillStyle = wheelColors[i];
+        ctx.fillStyle = wheelSegments[i].color;
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, 120, i * arc, (i + 1) * arc);
         ctx.fill();
 
         ctx.save();
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 13px sans-serif';
+        ctx.font = 'bold 11px sans-serif';
         ctx.textAlign = 'right';
         ctx.rotate((i + 0.5) * arc);
-        ctx.fillText(`${wheelRewards[i]} C`, 105, 5);
+        ctx.fillText(wheelSegments[i].text, 110, 4);
         ctx.restore();
       }
       ctx.restore();
@@ -458,9 +486,9 @@
     function playSpin() {
       if (spinsLeft <= 0) return showToast('⚠️ No spins left today!');
       spinsLeft--;
-      const targetIndex = Math.floor(Math.random() * wheelRewards.length);
-      const prize = wheelRewards[targetIndex];
-      const arc = (2 * Math.PI) / wheelRewards.length;
+      const targetIndex = Math.floor(Math.random() * wheelSegments.length);
+      const prize = wheelSegments[targetIndex].val;
+      const arc = (2 * Math.PI) / wheelSegments.length;
       const targetAngle = (3 * Math.PI / 2) - (targetIndex * arc + arc / 2) + (Math.PI * 8);
 
       let step = 0;
@@ -473,17 +501,21 @@
         } else {
           spinAngle = targetAngle;
           drawSpinWheel();
-          coins += prize;
-          addHistory('Daily Lucky Spin', prize);
+          if (prize > 0) {
+            coins += prize;
+            addHistory('Spin Wheel', prize);
+            showToast(`🎡 Won ${prize} Coins!`);
+          } else {
+            showToast('😅 Better luck next time!');
+          }
           syncState();
-          showToast(`🎡 Won ${prize} Coins!`);
         }
       }
       animate();
     }
 
     // --- SCRATCH CARD ---
-    let scratchPrize = 15;
+    let scratchPrize = 10;
     function initScratch() {
       const canvas = document.getElementById('scratchCanvas');
       if (!canvas) return;
@@ -519,108 +551,175 @@
     function resetScratch() {
       if (scratchLeft <= 0) return showToast('⚠️ No scratch cards left!');
       scratchLeft--;
-      scratchPrize = [5, 10, 15, 20][Math.floor(Math.random() * 4)];
-      document.getElementById('scratchRewardText').innerText = `+${scratchPrize} COINS!`;
-      coins += scratchPrize;
-      addHistory('Scratch Card', scratchPrize);
+      const rewardsPool = [0, 5, 10, 15, 20];
+      scratchPrize = rewardsPool[Math.floor(Math.random() * rewardsPool.length)];
+
+      if (scratchPrize > 0) {
+        document.getElementById('scratchRewardText').innerText = `+${scratchPrize} COINS!`;
+        coins += scratchPrize;
+        addHistory('Scratch Card', scratchPrize);
+        showToast(`✨ Scratch Won: +${scratchPrize} Coins!`);
+      } else {
+        document.getElementById('scratchRewardText').innerText = 'BETTER LUCK NEXT TIME!';
+        showToast('😅 Better luck next time!');
+      }
+
       syncState();
       initScratch();
-      showToast(`✨ Scratch Won: +${scratchPrize} Coins!`);
     }
 
-    // --- QUIZZES ---
-    function startQuiz(type) {
+    // --- QUIZ DATABASE ---
+    const quizDB = {
+      Math: [
+        { q: 'What is 15 + 28?', options: ['43', '41', '45', '39'], correct: '43' },
+        { q: 'What is 12 × 8?', options: ['96', '84', '108', '92'], correct: '96' },
+        { q: 'What is 100 - 37?', options: ['63', '53', '73', '67'], correct: '63' },
+        { q: 'What is 81 ÷ 9?', options: ['9', '8', '7', '6'], correct: '9' },
+        { q: 'What is 25 × 4?', options: ['100', '125', '75', '150'], correct: '100' }
+      ],
+      GK: [
+        { q: 'What is the capital of India?', options: ['New Delhi', 'Mumbai', 'Kolkata', 'Chennai'], correct: 'New Delhi' },
+        { q: 'Which is the longest river in India?', options: ['Ganga', 'Yamuna', 'Godavari', 'Narmada'], correct: 'Ganga' },
+        { q: 'Who wrote the Indian National Anthem?', options: ['Rabindranath Tagore', 'Bankim Chandra', 'Sarojini Naidu', 'Premchand'], correct: 'Rabindranath Tagore' },
+        { q: 'Which planet is known as the Red Planet?', options: ['Mars', 'Venus', 'Jupiter', 'Saturn'], correct: 'Mars' },
+        { q: 'Which is the national animal of India?', options: ['Tiger', 'Lion', 'Elephant', 'Leopard'], correct: 'Tiger' }
+      ],
+      Animation: [
+        { q: 'Who is Mickey Mouse\'s pet dog?', options: ['Pluto', 'Goofy', 'Scooby', 'Snoopy'], correct: 'Pluto' },
+        { q: 'In Doraemon, what is Doraemon\'s favorite food?', options: ['Dorayaki', 'Pizza', 'Burger', 'Noodles'], correct: 'Dorayaki' },
+        { q: 'Who is the famous cat always chasing Jerry?', options: ['Tom', 'Oggy', 'Garfield', 'Sylvester'], correct: 'Tom' },
+        { q: 'What color is Pikachu from Pokémon?', options: ['Yellow', 'Red', 'Blue', 'Green'], correct: 'Yellow' },
+        { q: 'In Chhota Bheem, what gives Bheem his power?', options: ['Laddoo', 'Jalebi', 'Samosa', 'Milk'], correct: 'Laddoo' }
+      ],
+      Puzzle: [
+        { q: 'What has hands, but cannot clap?', options: ['A Clock', 'A Robot', 'A Tree', 'A Mirror'], correct: 'A Clock' },
+        { q: 'I speak without a mouth and hear without ears. What am I?', options: ['An Echo', 'Wind', 'Shadow', 'Radio'], correct: 'An Echo' },
+        { q: 'What has to be broken before you can use it?', options: ['An Egg', 'Glass', 'Lock', 'Pen'], correct: 'An Egg' },
+        { q: 'What gets wet while drying?', options: ['A Towel', 'Water', 'Sun', 'Soap'], correct: 'A Towel' },
+        { q: 'Which number completes: 2, 4, 8, 16, ?', options: ['32', '24', '30', '64'], correct: '32' }
+      ]
+    };
+
+    function loadQuiz(category) {
       document.getElementById('activeQuizCard').classList.remove('hidden');
-      document.getElementById('quizTitle').innerText = `${type} Quiz (10-50 Coins)`;
+      document.getElementById('quizTitle').innerText = `${category} Quiz`;
 
-      const qBox = document.getElementById('quizQuestion');
-      const optBox = document.getElementById('quizOptions');
+      const list = quizDB[category];
+      const randomQ = list[Math.floor(Math.random() * list.length)];
 
-      if (type === 'Math') {
-        const n1 = Math.floor(Math.random() * 20) + 5;
-        const n2 = Math.floor(Math.random() * 10) + 2;
-        const ans = n1 + n2;
-        qBox.innerText = `Solve: ${n1} + ${n2} = ?`;
-        optBox.innerHTML = [ans, ans + 2, ans - 3, ans + 5].sort(() => Math.random() - 0.5).map(val => `
-          <button onclick="answerQuiz(${val === ans})" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-xs font-mono font-bold">${val}</button>
-        `).join('');
+      document.getElementById('quizQuestion').innerText = randomQ.q;
+      const opts = [...randomQ.options].sort(() => Math.random() - 0.5);
+
+      document.getElementById('quizOptions').innerHTML = opts.map(opt => `
+        <button onclick="handleQuizAnswer('${opt}', '${randomQ.correct}')" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-xs font-bold hover:border-emerald-500 transition">${opt}</button>
+      `).join('');
+    }
+
+    function handleQuizAnswer(selected, correct) {
+      if (selected === correct) {
+        coins += 10;
+        quizzesCount++;
+        addHistory('Quiz Solved', 10);
+        syncState();
+        showToast('🎉 Correct! +10 Coins credited!');
       } else {
-        qBox.innerText = `What is the official currency of India?`;
-        optBox.innerHTML = `
-          <button onclick="answerQuiz(true)" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-xs">Rupee (₹)</button>
-          <button onclick="answerQuiz(false)" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-xs">Dollar ($)</button>
+        showToast('❌ Wrong answer! Try again.');
+      }
+      document.getElementById('activeQuizCard').classList.add('hidden');
+    }
+     // --- DYNAMIC PAYOUT FIELDS ---
+    function renderPayoutFields() {
+      const method = document.getElementById('payoutMethodSelect').value;
+      const container = document.getElementById('dynamicFieldsContainer');
+
+      if (method === 'UPI') {
+        container.innerHTML = `
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">UPI ID</label>
+            <input type="text" id="field_upi" placeholder="example@upi or 9876543210@paytm" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+          </div>
+        `;
+      } else if (method === 'Bank') {
+        container.innerHTML = `
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">Account Holder Name</label>
+            <input type="text" id="field_bank_name" placeholder="Full Name as in Bank" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">Bank Account Number</label>
+            <input type="text" id="field_bank_acc" placeholder="Account Number" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">IFSC Code</label>
+            <input type="text" id="field_bank_ifsc" placeholder="e.g. SBIN0001234" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white uppercase" />
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">Mobile Number</label>
+            <input type="text" id="field_bank_mobile" placeholder="10-digit Mobile Number" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">Full Name</label>
+            <input type="text" id="field_gift_name" placeholder="Your Name" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">Gift Card Delivery Email</label>
+            <input type="email" id="field_gift_email" placeholder="example@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+          </div>
         `;
       }
     }
 
-    function answerQuiz(isCorrect) {
-      if (isCorrect) {
-        const reward = Math.random() < 0.1 ? 50 : Math.floor(Math.random() * 11) + 10;
-        coins += reward;
-        addHistory('Quiz Solved', reward);
-        syncState();
-        showToast(`🎉 Correct! +${reward} Coins!`);
+    function renderWithdrawalOptions() {
+      const select = document.getElementById('payoutAmountSelect');
+      if (!select) return;
+
+      if (cashoutDoneCount === 0) {
+        select.innerHTML = `
+          <option value="10">₹10 (1,000 Coins) - First Payout</option>
+          <option value="25">₹25 (2,500 Coins)</option>
+          <option value="50">₹50 (5,000 Coins)</option>
+          <option value="100">₹100 (10,000 Coins)</option>
+        `;
       } else {
-        showToast('❌ Incorrect answer! Try again.');
+        select.innerHTML = `
+          <option value="25">₹25 (2,500 Coins)</option>
+          <option value="50">₹50 (5,000 Coins)</option>
+          <option value="100">₹100 (10,000 Coins)</option>
+          <option value="200">₹200 (20,000 Coins)</option>
+          <option value="500">₹500 (50,000 Coins)</option>
+          <option value="1000">₹1,000 (100,000 Coins)</option>
+        `;
       }
-      document.getElementById('activeQuizCard').classList.add('hidden');
     }
 
-    // --- SCREENSHOT PROOF MODAL ---
-    function openScreenshotModal(taskName, url) {
-      currentTaskName = taskName;
-      document.getElementById('proofTitle').innerText = taskName;
-      document.getElementById('proofModal').classList.remove('hidden');
-      window.open(url, '_blank');
-    }
-
-    function closeProofModal() {
-      document.getElementById('proofModal').classList.add('hidden');
-      document.getElementById('proofFileInput').value = '';
-    }
-
-    async function uploadProofScreenshot() {
-      const fileInput = document.getElementById('proofFileInput');
-      if (!fileInput.files || !fileInput.files[0]) {
-        return showToast('⚠️ Please select a screenshot!');
-      }
-
-      const file = fileInput.files[0];
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        showToast('Uploading screenshot to Channel...');
-        try {
-          await fetch('/api/admin-log', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              type: 'SCREENSHOT_PROOF',
-              payload: {
-                name: USER_NAME,
-                userId: USER_ID,
-                taskName: currentTaskName,
-                photoBase64: e.target.result,
-                date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-              }
-            })
-          });
-          closeProofModal();
-          showToast('✓ Screenshot submitted! Pending admin approval.');
-        } catch (err) {
-          showToast('❌ Upload failed. Try again.');
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // --- CASHOUT API ---
+    // --- CASHOUT SUBMISSION ---
     async function submitCashout() {
       const method = document.getElementById('payoutMethodSelect').value;
-      const account = document.getElementById('payoutAccountInput').value.trim();
       const amount = parseInt(document.getElementById('payoutAmountSelect').value);
       const coinsNeeded = amount * 100;
+      let detailsString = '';
 
-      if (!account) return showToast('⚠️ Enter payment account/UPI!');
+      if (method === 'UPI') {
+        const upi = document.getElementById('field_upi')?.value.trim();
+        if (!upi) return showToast('⚠️ Enter UPI ID!');
+        detailsString = `UPI ID: ${upi}`;
+      } else if (method === 'Bank') {
+        const name = document.getElementById('field_bank_name')?.value.trim();
+        const acc = document.getElementById('field_bank_acc')?.value.trim();
+        const ifsc = document.getElementById('field_bank_ifsc')?.value.trim();
+        const mob = document.getElementById('field_bank_mobile')?.value.trim();
+        if (!name || !acc || !ifsc || !mob) return showToast('⚠️ Fill all bank details!');
+        detailsString = `Name: ${name}\nAcc: ${acc}\nIFSC: ${ifsc}\nMobile: ${mob}`;
+      } else {
+        const name = document.getElementById('field_gift_name')?.value.trim();
+        const email = document.getElementById('field_gift_email')?.value.trim();
+        if (!name || !email) return showToast('⚠️ Enter name and email!');
+        detailsString = `Name: ${name}\nEmail: ${email}`;
+      }
+
       if (coins < coinsNeeded) return showToast(`⚠️ Need ${coinsNeeded} coins!`);
 
       const btn = document.getElementById('btnWithdraw');
@@ -639,7 +738,13 @@
               amount: amount,
               coins: coinsNeeded,
               method: method,
-              account: account,
+              details: detailsString,
+              historySummary: {
+                ads: adsCount,
+                spins: 5 - spinsLeft,
+                quizzes: quizzesCount,
+                totalCashouts: cashoutDoneCount
+              },
               date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
             }
           })
@@ -648,10 +753,11 @@
         const data = await res.json();
         if (res.ok && data.success) {
           coins -= coinsNeeded;
-          addHistory(`Cashout (${method})`, coinsNeeded, 'Debit');
+          cashoutDoneCount++;
+          addHistory(`Cashout Request (${method})`, coinsNeeded, 'Debit');
           syncState();
-          document.getElementById('payoutAccountInput').value = '';
-          showToast('✓ Request Sent! Alerted to Private Channel.');
+          showToast('✓ Request Sent! Alert logged to Channel with Approve/Reject buttons.');
+          renderPayoutFields();
         } else {
           showToast('❌ Submission failed.');
         }
@@ -663,6 +769,51 @@
       }
     }
 
+    // --- PROOF SCREENSHOT SUBMIT ---
+    function openProofModal(task, url) {
+      currentTaskName = task;
+      document.getElementById('proofTitle').innerText = task;
+      document.getElementById('proofModal').classList.remove('hidden');
+      window.open(url, '_blank');
+    }
+
+    function closeProofModal() {
+      document.getElementById('proofModal').classList.add('hidden');
+      document.getElementById('proofFileInput').value = '';
+    }
+
+    async function uploadProofScreenshot() {
+      const fileInput = document.getElementById('proofFileInput');
+      if (!fileInput.files || !fileInput.files[0]) return showToast('⚠️ Select a screenshot!');
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        showToast('Uploading to Channel...');
+        try {
+          await fetch('/api/admin-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'SCREENSHOT_PROOF',
+              payload: {
+                name: USER_NAME,
+                userId: USER_ID,
+                taskName: currentTaskName,
+                photoBase64: e.target.result,
+                date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+              }
+            })
+          });
+          closeProofModal();
+          showToast('✓ Screenshot submitted! Admin will verify.');
+        } catch (err) {
+          showToast('❌ Upload failed.');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
     function copyRefLink() {
       navigator.clipboard.writeText(`https://t.me/RozgarPayProofs?start=${USER_ID}`);
       showToast('📋 Link Copied!');
@@ -670,14 +821,13 @@
 
     function shareTelegramRef() {
       const url = encodeURIComponent(`https://t.me/RozgarPayProofs?start=${USER_ID}`);
-      const text = encodeURIComponent('Join Rozgar Pay and earn real money daily!');
-      window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
+      window.open(`https://t.me/share/url?url=${url}&text=${encodeURIComponent('Join Rozgar Pay and earn real rewards daily!')}`, '_blank');
     }
 
-    // Initial Sync
+    // Init
     syncState();
     renderHistory();
+    renderPayoutFields();
   </script>
 </body>
 </html>
-
