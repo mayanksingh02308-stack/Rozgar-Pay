@@ -1,3 +1,6 @@
+<script>
+  window.initCdTma?.({ id: '463818' });
+</script>
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -144,7 +147,7 @@
         <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 text-2xl flex items-center justify-center mx-auto mb-3">📺</div>
         <h3 class="text-sm font-bold text-white">Watch Video Advertisement</h3>
         <p class="text-xs text-slate-400 mb-4">पूरे 15 सेकंड देखने पर 10 कॉइन तुरंत जुड़ेंगे।</p>
-        <button id="btnWatchAd" onclick="startAdTimer()" class="w-full bg-rose-500 hover:bg-rose-400 text-white font-bold py-3 rounded-xl text-xs active:scale-95 transition">
+        <button id="btnWatchAd" onclick="watchRewardedAd()" class="w-full bg-rose-500 hover:bg-rose-400 text-white font-bold py-3 rounded-xl text-xs active:scale-95 transition">
           Watch Video Ad (+10 Coins)
         </button>
         <div id="adTimerBox" class="mt-3 hidden">
@@ -415,7 +418,25 @@
       showToast(`🎁 Claimed Day Bonus: +${reward} Coins!`);
     }
 
-    // --- 15-SECOND WATCH AD (10 COINS) ---
+function watchRewardedAd() {
+  if (window.show) {
+    window.show()
+      .then(() => {
+        coins += 10;
+        adsCount++;
+        addHistory('Watch Ad (15s)', 10, 'Credit');
+        syncState();
+        showToast('✓ Ad finished! +10 Coins credited.');
+      })
+      .catch((err) => {
+        console.error('Ad failed or skipped:', err);
+        showToast('Ad cancel ho gaya!');
+      });
+  } else {
+    alert('Ad load nahi ho paya, kripya thodi der baad prayas karein.');
+  }
+}
+     
     function startAdTimer() {
       const btn = document.getElementById('btnWatchAd');
       const timerBox = document.getElementById('adTimerBox');
@@ -837,9 +858,9 @@
 // Initialize the ad engine and retrieve the SHOW method for displaying ads
   window.initCdTma?.({ id: 'Your Spot ID' }).then(show => window.show = show).catch(e => console.log(e))
 </script>
-// On button click, activate the retrieved SHOW method, which will return a Promise with the ad display success result
-<button onclick="window.show?.().then(() => console.log('tma ad played')).catch(e => console.log(e))">
-  Play Ads
+<script>
+  window.initCdTma?.({ id: '463818' });
+</script>
 </button>
   </body>
 </body>
