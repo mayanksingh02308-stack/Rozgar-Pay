@@ -4,20 +4,19 @@ export default async function handler(req, res) {
   const BOT_TOKEN = '8656552035:AAGNrF-04-VISuC_-RvCtMH2z9XfICvKV6g';
   const CHANNEL_ID = '-1004439980815';
 
-  // ऑटोमैटिक वेबहुक सेटअप (अगर सेट नहीं है तो खुद कनेक्ट कर लेगा)
   const host = req.headers['host'];
   if (host && !host.includes('localhost')) {
     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=https://${host}/api/admin-log`).catch(() => {});
   }
 
-  // 1. Vercel Cron Job (रात 12:00 बजे IST ऑटोमैटिक रिपोर्ट)
+  // 1. Vercel Cron Job (12:00 AM IST Midnight Summary)
   if (req.method === 'GET') {
-    const today = new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' });
-    const text = `📊 <b>MIDNIGHT DAILY SUMMARY REPORT</b>\n\n` +
-                 `📅 <b>Date:</b> ${today}\n` +
-                 `⏰ <b>Trigger:</b> Scheduled 12:00 AM Auto-Report\n` +
-                 `👥 <b>Status:</b> All daily limits (Ads, Spins, Streak) reset for users.\n\n` +
-                 `✅ <i>System running successfully.</i>`;
+    const today = new Date().toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata', dateStyle: 'medium' });
+    const text = `📊 <b>SYSTEM AUDIT REPORT | DAILY SUMMARY</b>\n\n` +
+                 `📅 <b>Date:</b> <code>${today}</code>\n` +
+                 `⏰ <b>Execution Cycle:</b> 12:00 AM Midnight Trigger\n` +
+                 `🔄 <b>Quota Refresh:</b> Daily engagement limits, ads, and streaks refreshed.\n\n` +
+                 `✅ <i>System operational. Integrity checks normal.</i>`;
 
     try {
       await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -25,7 +24,7 @@ export default async function handler(req, res) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: CHANNEL_ID, text, parse_mode: 'HTML' })
       });
-      return res.status(200).json({ success: true, message: 'Cron report sent' });
+      return res.status(200).json({ success: true });
     } catch (err) {
       return res.status(500).json({ success: false, error: err.message });
     }
@@ -37,7 +36,7 @@ export default async function handler(req, res) {
 
   const body = req.body;
 
-  // 2. जब आप टेलीग्राम चैनल में APPROVE या REJECT बटन दबाते हैं
+  // 2. Telegram Inline Callback Actions (Approve / Reject)
   if (body.callback_query) {
     const query = body.callback_query;
     const data = query.data;
@@ -48,33 +47,69 @@ export default async function handler(req, res) {
     let alertText = "";
     let statusLabel = "";
 
+    // Screenshot Proof Verification
     if (data.startsWith('approve_ss_')) {
-      alertText = "✅ Screenshot Approved! +50 Coins Added.";
-      statusLabel = "\n\n🟢 <b>STATUS: APPROVED BY ADMIN (+50 COINS)</b>";
-    } else if (data.startsWith('reject_ss_')) {
-      alertText = "❌ Screenshot Rejected!";
-      statusLabel = "\n\n🔴 <b>STATUS: REJECTED BY ADMIN</b>";
-    } else if (data.startsWith('approve_cashout_')) {
-      alertText = "✅ Payout Approved & Sent!";
-      statusLabel = "\n\n🟢 <b>STATUS: PAYOUT APPROVED & PAID</b>";
-    } else if (data.startsWith('reject_cashout_')) {
-      alertText = "❌ Payout Rejected!";
-      statusLabel = "\n\n🔴 <b>STATUS: PAYOUT REJECTED</b>";
-    }
+      const targetUserId = data.replace('approve_ss_', '');
+      alertText = "Verification successful. Reward notification dispatched.";
+      statusLabel = "\n\n🟢 <b>STATUS: VERIFIED & REWARD ISSUED (+50 COINS)</b>";
 
-    try {
-      // टेलीग्राम स्क्रीन पर पॉपअप अलर्ट दिखाएँ
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+      // Professional User Notification (English)
+      const claimUrl = `https://t.me/QuickToolBoxBot/RozgarPay?startapp=bonus_50`;
+      const userMsg = `🎖️ <b>Task Verification Successful</b>\n\n` +
+                      `Dear Member,\n` +
+                      `Your submitted social task proof has been authenticated by our administration team.\n\n` +
+                      `💰 <b>Credited Reward:</b> <code>+50 Coins</code>\n` +
+                      `📌 <b>Status:</b> Approved\n\n` +
+                      `Tap the secure link below to synchronize and deposit your reward balance:`;
+
+      const userKeyboard = {
+        inline_keyboard: [
+          [{ text: '🎁 Claim +50 Coins to Balance', url: claimUrl }]
+        ]
+      };
+
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          callback_query_id: query.id,
-          text: alertText,
-          show_alert: true
+          chat_id: targetUserId,
+          text: userMsg,
+          parse_mode: 'HTML',
+          reply_markup: userKeyboard
         })
+      }).catch(() => {});
+
+    } else if (data.startsWith('reject_ss_')) {
+      const targetUserId = data.replace('reject_ss_', '');
+      alertText = "Proof rejected. User informed.";
+      statusLabel = "\n\n🔴 <b>STATUS: REJECTED | NON-COMPLIANT SUBMISSION</b>";
+
+      const rejectMsg = `⚠️ <b>Verification Notification | Submission Rejected</b>\n\n` +
+                        `Dear Member,\n` +
+                        `Your recent task submission did not satisfy the validation criteria.\n\n` +
+                        `ℹ️ <i>Reason: Incomplete engagement or unverified proof of subscription. Please re-execute the task following the official requirements.</i>`;
+
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: targetUserId, text: rejectMsg, parse_mode: 'HTML' })
+      }).catch(() => {});
+
+    } else if (data.startsWith('approve_cashout_')) {
+      alertText = "Payout marked as dispatched.";
+      statusLabel = "\n\n🟢 <b>PAYOUT DISPATCHED | SETTLEMENT COMPLETE</b>";
+    } else if (data.startsWith('reject_cashout_')) {
+      alertText = "Cashout request rejected.";
+      statusLabel = "\n\n🔴 <b>PAYOUT DECLINED | IRREGULAR ACTIVITY</b>";
+    }
+
+    try {
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callback_query_id: query.id, text: alertText, show_alert: true })
       });
 
-      // मैसेज से बटन हटाकर स्टेटस अपडेट करें
       if (message.caption) {
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageCaption`, {
           method: 'POST',
@@ -105,30 +140,29 @@ export default async function handler(req, res) {
     }
   }
 
-  // 3. ऐप से आने वाले नए रिक्वेस्ट्स (CASHOUT और SCREENSHOT_PROOF)
+  // 3. Incoming Requests (Cashouts & Screenshot Submissions)
   const { type, payload } = body;
-
   try {
-    // कैशआउट रिक्वेस्ट (यूज़र हिस्ट्री व बटन्स के साथ)
     if (type === 'CASHOUT') {
       const { name, userId, amount, coins, method, details, historySummary, date } = payload;
-      const text = `🚨 <b>NEW CASHOUT REQUEST!</b>\n\n` +
-                   `👤 <b>User:</b> ${name} (<code>${userId}</code>)\n` +
-                   `💰 <b>Amount:</b> ₹${amount} (${coins} Coins)\n` +
-                   `💳 <b>Method:</b> ${method}\n` +
-                   `📌 <b>Details:</b>\n<code>${details}</code>\n\n` +
-                   `📊 <b>User Daily Activity & History:</b>\n` +
-                   `• Ads Watched Today: ${historySummary?.ads || 0}\n` +
-                   `• Spins Done: ${historySummary?.spins || 0}\n` +
-                   `• Quizzes Solved: ${historySummary?.quizzes || 0}\n` +
-                   `• Total Lifetime Cashouts: ${historySummary?.totalCashouts || 0}\n\n` +
-                   `⏰ <b>Time:</b> ${date}`;
+      const text = `🏦 <b>SETTLEMENT AUDIT: CASHOUT REQUEST</b>\n\n` +
+                   `👤 <b>Beneficiary:</b> ${name}\n` +
+                   `🆔 <b>User ID:</b> <code>${userId}</code>\n` +
+                   `💵 <b>Redemption Value:</b> ₹${amount} (<code>${coins} Coins</code>)\n` +
+                   `💳 <b>Transfer Route:</b> ${method}\n` +
+                   `📌 <b>Account Coordinates:</b>\n<code>${details}</code>\n\n` +
+                   `📋 <b>Engagement Audit (Fraud Check):</b>\n` +
+                   `• Ads Logged: ${historySummary?.ads || 0}\n` +
+                   `• Spins Executed: ${historySummary?.spins || 0}\n` +
+                   `• Quizzes Completed: ${historySummary?.quizzes || 0}\n` +
+                   `• Historical Cashouts: ${historySummary?.totalCashouts || 0}\n\n` +
+                   `⏰ <b>Timestamp:</b> ${date}`;
 
       const reply_markup = {
         inline_keyboard: [
           [
-            { text: '✅ APPROVE PAYOUT', callback_data: `approve_cashout_${userId}_${amount}` },
-            { text: '❌ REJECT', callback_data: `reject_cashout_${userId}_${amount}` }
+            { text: '✅ APPROVE & DISPATCH', callback_data: `approve_cashout_${userId}_${amount}` },
+            { text: '❌ DECLINE PAYOUT', callback_data: `reject_cashout_${userId}_${amount}` }
           ]
         ]
       };
@@ -141,20 +175,19 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true, message: 'Cashout logged' });
     }
 
-    // स्क्रीनशॉट टास्क (Approve/Reject बटन्स के साथ)
     if (type === 'SCREENSHOT_PROOF') {
       const { name, userId, taskName, photoBase64, date } = payload;
-      const caption = `📸 <b>NEW SCREENSHOT SUBMISSION!</b>\n\n` +
-                      `👤 <b>User:</b> ${name} (<code>${userId}</code>)\n` +
-                      `🎯 <b>Task:</b> ${taskName}\n` +
-                      `⏰ <b>Time:</b> ${date}\n\n` +
-                      `👉 <i>Verify and click below to reward 50 Coins:</i>`;
+      const caption = `📋 <b>COMPLIANCE REVIEW: SOCIAL TASK PROOF</b>\n\n` +
+                      `👤 <b>Member:</b> ${name} (<code>${userId}</code>)\n` +
+                      `🎯 <b>Target Task:</b> ${taskName}\n` +
+                      `⏰ <b>Timestamp:</b> ${date}\n\n` +
+                      `<i>Verify alignment with channel subscription policies:</i>`;
 
       const reply_markup = JSON.stringify({
         inline_keyboard: [
           [
             { text: '✅ APPROVE (+50 Coins)', callback_data: `approve_ss_${userId}` },
-            { text: '❌ REJECT', callback_data: `reject_ss_${userId}` }
+            { text: '❌ DECLINE SUBMISSION', callback_data: `reject_ss_${userId}` }
           ]
         ]
       });
@@ -194,3 +227,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ success: false, error: error.message });
   }
 }
+
