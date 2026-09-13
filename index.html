@@ -2,559 +2,509 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Rozgar Pay - Daily Free Rozgar</title>
-  
-  <!-- Telegram WebApp SDK -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rozgar Pay - Daily Rewards</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Adsgram SDK -->
-  <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
   <style>
-    body {
-      background-color: #0b1120;
-      color: #f8fafc;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
+    body { -webkit-tap-highlight-color: transparent; user-select: none; font-family: system-ui, sans-serif; }
+    .scratch-canvas { touch-action: none; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+    .animate-marquee { display: inline-block; white-space: nowrap; animation: marquee 16s linear infinite; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between font-sans pb-24">
-
-  <!-- TOP HEADER -->
-  <header class="p-4 bg-slate-900/90 border-b border-slate-800 sticky top-0 z-50 backdrop-blur-md">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center font-bold text-slate-950 text-base shadow">
-          🪙
-        </div>
-        <div>
-          <h2 id="userName" class="font-bold text-sm leading-tight text-white">Rozgar User</h2>
-          <p class="text-[11px] text-emerald-400 font-medium">100 Coins = ₹1.00</p>
-        </div>
-      </div>
-      <div class="text-right">
-        <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Balance</span>
-        <div class="text-lg font-black text-amber-400 leading-none">
-          <span id="userBalance">0</span> <span class="text-xs text-slate-400 font-normal">Coins</span>
-        </div>
-        <p id="rupeeEquiv" class="text-[11px] text-slate-300 font-bold mt-0.5">≈ ₹0.00</p>
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-24 select-none">
+  <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 to-emerald-500 flex items-center justify-center font-bold text-slate-950 text-lg">₹</div>
+      <div>
+        <h1 class="text-sm font-bold tracking-tight text-white flex items-center gap-1"><span id="userName">User</span></h1>
+        <p class="text-[10px] text-slate-400 font-mono">ID: <span id="userId">...</span></p>
       </div>
     </div>
-
-    <!-- Live Ticker -->
-    <div class="mt-3 bg-slate-800/80 rounded-lg px-2.5 py-1 text-[11px] text-slate-300 flex items-center overflow-hidden">
-      <span class="text-amber-400 mr-1.5 font-bold">🔥 Alert:</span>
-      <marquee scrollamount="4">Suraj won ₹50 from Daily Leaderboard! • Refer friends and get ₹0.80 instantly! • Unlimited Ads Active!</marquee>
+    <div class="bg-slate-950 border border-slate-800 rounded-full px-3 py-1 flex items-center gap-3">
+      <div class="flex items-center gap-1.5 border-r border-slate-800 pr-2.5">
+        <span class="text-amber-400 text-xs">🪙</span><span id="coinBalance" class="text-xs font-bold text-amber-300 font-mono">0</span>
+      </div>
+      <div class="flex items-center gap-1">
+        <span class="text-emerald-400 text-xs font-bold">₹</span><span id="rupeeBalance" class="text-xs font-bold text-emerald-300 font-mono">0.00</span>
+      </div>
     </div>
   </header>
 
-  <!-- DYNAMIC VIEW TABS -->
-  <main class="p-4 flex-1">
+  <div class="bg-slate-900 border-b border-slate-800/80 px-3 py-1.5 overflow-hidden">
+    <div class="animate-marquee text-[11px] text-emerald-400 font-medium">
+      🎉 User @Rahul*** withdrew ₹50 via UPI • User @Aman*** withdrew ₹25 • User @Pooja*** claimed Daily Bonus!
+    </div>
+  </div>
 
-    <!-- 1. HOME TAB -->
-    <div id="tab-home" class="space-y-4">
-      
-      <!-- 300 Ads Milestone -->
-      <div class="bg-gradient-to-r from-blue-950/60 to-indigo-950/60 border border-blue-800/50 rounded-2xl p-3.5 shadow-sm">
-        <div class="flex justify-between items-center mb-1.5">
-          <span class="text-xs font-bold text-blue-200">Daily 300 Ads Bonus</span>
-          <span class="text-[11px] font-extrabold text-amber-300">+₹10 (1,000 Coins)</span>
-        </div>
-        <div class="w-full bg-slate-800 rounded-full h-2">
-          <div id="adProgressBar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
-        </div>
-        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-          <span id="adProgressText">Ads Watched: 0 / 300</span>
-          <span>Target: ₹10 Reward</span>
-        </div>
-      </div>
+  <div id="toastBox" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 -translate-y-2">
+    <div id="toastMsg" class="bg-emerald-500 text-slate-950 px-4 py-2 rounded-full text-xs font-bold shadow-lg shadow-emerald-500/20 flex items-center gap-1.5">✓ Success</div>
+  </div>
 
-      <!-- Unlimited Watch Ad -->
-      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+  <main class="max-w-md mx-auto p-4 space-y-4">
+    <section id="tab-home" class="space-y-4">
+      <div class="bg-gradient-to-r from-amber-500/20 via-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-2xl p-4 flex items-center justify-between">
         <div>
-          <span class="text-[10px] font-extrabold bg-blue-900/60 text-blue-300 px-2 py-0.5 rounded border border-blue-700">UNLIMITED</span>
-          <h3 class="font-bold text-sm text-slate-100 mt-1">Watch Video Ad</h3>
-          <p class="text-xs text-slate-400">Watch complete 15s sponsored ad</p>
-          <span class="inline-block mt-2 text-[11px] font-bold text-emerald-400 bg-emerald-950/70 border border-emerald-800 px-2 py-0.5 rounded-md">
-            +10 Coins (₹0.10)
-          </span>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold uppercase">Day 7 Streak</span>
+          <h2 class="text-base font-bold text-white mt-1">Daily Check-In</h2>
+          <p class="text-[11px] text-slate-400">Claim 50 Coins every 24h</p>
         </div>
-        <button onclick="handleUnlimitedAd()" class="bg-gradient-to-r from-blue-600 to-indigo-600 active:scale-95 text-white font-bold text-xs px-4 py-3 rounded-xl shadow-md">
-          Watch 📺
-        </button>
+        <button id="dailyBonusBtn" onclick="claimDailyBonus()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition active:scale-95">Claim 🎁</button>
       </div>
 
-      <!-- Daily Login Bonus -->
-      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <p class="text-[11px] text-slate-400">Total Ads Watched</p>
+          <div class="flex items-baseline gap-1 mt-1"><span id="metricAds" class="text-lg font-bold text-white font-mono">0</span><span class="text-[10px] text-slate-500">videos</span></div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+          <p class="text-[11px] text-slate-400">Referral Earned</p>
+          <div class="flex items-baseline gap-1 mt-1"><span class="text-lg font-bold text-amber-400 font-mono">₹0.00</span></div>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-3"><span class="text-2xl">📢</span><div><p class="text-xs font-bold text-white">Payment Proofs</p><p class="text-[10px] text-slate-400">View real-time cashout updates</p></div></div>
+        <a href="https://t.me/RozgarPayProofs" target="_blank" class="text-xs bg-slate-800 text-emerald-400 px-3 py-1.5 rounded-lg border border-slate-700 font-medium">Join</a>
+      </div>
+    </section>
+
+    <section id="tab-tasks" class="space-y-4 hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+        <div class="flex justify-between items-center mb-2">
+          <div class="flex items-center gap-2"><span class="text-lg">📺</span><h3 class="text-sm font-bold text-white">Watch & Earn Coins</h3></div>
+          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-mono"><span id="adsLeftToday">10</span>/10 left</span>
+        </div>
+        <p class="text-xs text-slate-400 mb-3">Watch an ad video to receive 20 coins instantly.</p>
+        <button id="watchAdBtn" onclick="watchVideoAd()" class="w-full bg-gradient-to-r from-amber-500 to-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-xs transition active:scale-95">▶ Watch Video Ad (+20 Coins)</button>
+        <p id="adCooldownNotice" class="text-[10px] text-slate-500 text-center mt-2 hidden">Next ad in <span id="adTimer">20</span>s</p>
+      </div>
+
+      <div class="space-y-2">
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Daily Milestones</h4>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
+          <div><p class="text-xs font-bold text-white">Watch 5 Ads</p><p class="text-[10px] text-amber-400 font-mono">+50 Bonus Coins</p></div>
+          <button id="btn-m5" onclick="claimMilestone(5, 50)" class="bg-slate-800 text-slate-500 text-xs px-3 py-1.5 rounded-lg font-bold border border-slate-700" disabled>Locked</button>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
+          <div><p class="text-xs font-bold text-white">Watch 10 Ads</p><p class="text-[10px] text-amber-400 font-mono">+120 Bonus Coins</p></div>
+          <button id="btn-m10" onclick="claimMilestone(10, 120)" class="bg-slate-800 text-slate-500 text-xs px-3 py-1.5 rounded-lg font-bold border border-slate-700" disabled>Locked</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-arcade" class="space-y-4 hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center">
+        <h3 class="text-sm font-bold text-white mb-1">Lucky Spin Wheel</h3>
+        <p class="text-[11px] text-slate-400 mb-3">Spins Left: <span id="spinsCount" class="font-mono text-amber-400">5</span></p>
+        <div class="relative w-64 h-64 mx-auto mb-3 flex items-center justify-center">
+          <div class="absolute -top-2 z-10 text-emerald-400 text-2xl">▼</div>
+          <canvas id="wheelCanvas" width="250" height="250" class="rounded-full shadow-lg border-4 border-slate-800"></canvas>
+        </div>
+        <button id="spinActionBtn" onclick="spinWheel()" class="w-full bg-emerald-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition active:scale-95">SPIN THE WHEEL</button>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 text-center">
+        <div class="flex justify-between items-center mb-2"><h3 class="text-sm font-bold text-white">Golden Scratch Card</h3><span class="text-[10px] text-slate-400">Left: <span id="scratchCount" class="font-mono text-amber-400">5</span></span></div>
+        <div class="relative w-64 h-32 mx-auto mb-3 border border-slate-700 rounded-xl overflow-hidden bg-slate-950 flex items-center justify-center">
+          <p id="scratchPrizeLabel" class="text-lg font-bold text-amber-400 select-none">+25 COINS!</p>
+          <canvas id="scratchCanvas" width="256" height="128" class="scratch-canvas absolute top-0 left-0 w-full h-full cursor-pointer"></canvas>
+        </div>
+        <button onclick="resetScratchCard()" class="text-xs text-slate-400 hover:text-white underline">Get New Card</button>
+      </div>
+    </section>
+
+    <section id="tab-refer" class="space-y-4 hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center space-y-3">
+        <div class="w-12 h-12 bg-amber-500/10 text-amber-400 text-2xl rounded-2xl flex items-center justify-center mx-auto">👥</div>
+        <div><h3 class="text-base font-bold text-white">Invite Friends & Earn</h3><p class="text-xs text-slate-400 mt-1">Get 100 Coins for each friend who joins.</p></div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
+          <span id="refLinkDisplay" class="text-xs text-slate-400 font-mono truncate max-w-[200px]">...</span>
+          <button onclick="copyReferralLink()" class="bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg border border-slate-700">Copy</button>
+        </div>
+        <button onclick="shareOnTelegram()" class="w-full bg-sky-500 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2"><span>✈</span> Share on Telegram</button>
+      </div>
+    </section>
+
+    <section id="tab-wallet" class="space-y-4 hidden">
+      <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-4">
+        <p class="text-[11px] text-slate-400 uppercase tracking-wider">Available Balance</p>
+        <div class="flex items-baseline gap-2 mt-1"><span class="text-2xl font-bold text-white font-mono">₹<span id="walletRupee">0.00</span></span><span class="text-xs text-amber-400 font-mono">(<span id="walletCoins">0</span> Coins)</span></div>
+        <p class="text-[10px] text-slate-500 mt-1">100 Coins = ₹1.00</p>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <h3 class="text-sm font-bold text-white">Withdrawal / Cashout</h3>
         <div>
-          <h3 class="font-bold text-sm text-slate-100">Daily Check-in</h3>
-          <p class="text-xs text-slate-400">Claim free bonus once every 24h</p>
-          <span class="inline-block mt-2 text-[11px] font-bold text-amber-400 bg-amber-950/70 border border-amber-800 px-2 py-0.5 rounded-md">
-            +50 Coins (₹0.50)
-          </span>
-        </div>
-        <button onclick="handleDailyBonus()" class="bg-emerald-600 active:scale-95 text-white font-bold text-xs px-4 py-3 rounded-xl shadow-md">
-          Claim 🎁
-        </button>
-      </div>
-
-      <!-- Refer Banner -->
-      <div class="bg-gradient-to-tr from-amber-950/40 to-slate-900 border border-amber-800/40 rounded-2xl p-4">
-        <h4 class="font-bold text-xs text-amber-300">Invite Friends & Earn</h4>
-        <p class="text-[11px] text-slate-300 mt-1">Earn 80 Coins (₹0.80) for every friend who joins.</p>
-        <button onclick="shareReferralLink()" class="mt-2.5 bg-amber-500 text-slate-950 font-bold text-xs py-2 px-3 rounded-lg w-full">
-          Share Invite Link (₹0.80) 🚀
-        </button>
-      </div>
-    </div>
-
-    <!-- 2. TASKS & GAMES TAB -->
-    <div id="tab-games" class="hidden space-y-4">
-      
-      <!-- Spin -->
-      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-4">
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="font-bold text-sm text-slate-100">🎡 Lucky Wheel Spin</h3>
-          <span id="spinLeftText" class="text-[11px] font-semibold text-indigo-400 bg-indigo-950/80 px-2 py-0.5 rounded border border-indigo-800">5 Left</span>
-        </div>
-        <p class="text-xs text-slate-400 mb-3">Spin wheel and claim rewards.</p>
-        <button onclick="playSpinWheel()" class="w-full bg-indigo-600 active:scale-95 text-white font-bold text-xs py-2.5 rounded-xl">
-          Spin Now (5 - 20 Coins)
-        </button>
-      </div>
-
-      <!-- Scratch Card -->
-      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-4">
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="font-bold text-sm text-slate-100">🎴 Golden Scratch Card</h3>
-          <span id="scratchLeftText" class="text-[11px] font-semibold text-yellow-400 bg-yellow-950/80 px-2 py-0.5 rounded border border-yellow-800">5 Left</span>
-        </div>
-        <p class="text-xs text-slate-400 mb-3">Scratch to win guaranteed coins.</p>
-        <button onclick="playScratchCard()" class="w-full bg-yellow-600 active:scale-95 text-slate-950 font-extrabold text-xs py-2.5 rounded-xl">
-          Scratch Card (5 - 25 Coins)
-        </button>
-      </div>
-
-      <!-- Math Quiz -->
-      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-4">
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="font-bold text-sm text-slate-100">🧮 Math Quiz</h3>
-          <span id="quizLeftText" class="text-[11px] font-semibold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">10 Left</span>
-        </div>
-        <div class="bg-slate-900 p-3 rounded-xl mb-3 text-center">
-          <span id="quizQuestion" class="text-base font-bold text-white tracking-widest">Loading...</span>
-        </div>
-        <div id="quizOptions" class="grid grid-cols-2 gap-2"></div>
-      </div>
-    </div>
-
-    <!-- 3. SOCIAL CHANNELS TAB -->
-    <div id="tab-social" class="hidden space-y-4">
-      <!-- Telegram Auto Task -->
-      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-4">
-        <div class="flex justify-between items-start">
-          <div>
-            <h4 class="font-bold text-xs text-slate-100">Join Official Telegram</h4>
-            <p class="text-[11px] text-slate-400 mt-0.5">Instant automatic 3-second credit</p>
-            <span class="inline-block mt-1 text-[10px] font-bold text-emerald-400">+60 Coins (₹0.60)</span>
+          <label class="block text-[11px] text-slate-400 mb-1">Payment Method</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="selectPayoutMethod('UPI')" id="method-UPI" class="method-btn py-2 px-3 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold text-center">UPI Transfer</button>
+            <button type="button" onclick="selectPayoutMethod('Paytm')" id="method-Paytm" class="method-btn py-2 px-3 bg-slate-800 text-slate-400 border border-slate-700 rounded-xl text-xs font-bold text-center">Paytm Wallet</button>
           </div>
-          <button onclick="verifyTelegramTask()" id="tgTaskBtn" class="bg-blue-600 text-white font-bold text-xs px-3 py-2 rounded-xl">
-            Join & Verify
-          </button>
         </div>
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">UPI ID / Phone Number</label>
+          <input type="text" id="payoutAddress" placeholder="example@upi or 9876543210" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1">Amount</label>
+          <select id="payoutAmount" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <option value="10">₹10 (1000 Coins)</option>
+            <option value="25">₹25 (2500 Coins)</option>
+            <option value="50">₹50 (5000 Coins)</option>
+            <option value="100">₹100 (10000 Coins)</option>
+          </select>
+        </div>
+        <button id="withdrawBtn" onclick="submitCashoutRequest()" class="w-full bg-emerald-500 text-slate-950 font-bold py-3 rounded-xl text-xs transition active:scale-95 shadow-lg shadow-emerald-500/20">Submit Cashout Request</button>
       </div>
-
-      <!-- YouTube Task -->
-      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-4">
-        <div class="flex justify-between items-start mb-2">
-          <div>
-            <h4 class="font-bold text-xs text-slate-100">Subscribe YouTube Channel</h4>
-            <p class="text-[11px] text-slate-400 mt-0.5">@Rewardnet official channel</p>
-            <span class="inline-block mt-1 text-[10px] font-bold text-emerald-400">+60 Coins (₹0.60)</span>
-          </div>
-          <a href="https://www.youtube.com/@Rewardnet" target="_blank" class="bg-red-600 text-white font-bold text-xs px-3 py-2 rounded-xl">
-            Subscribe
-          </a>
-        </div>
-        <div class="mt-3 pt-3 border-t border-slate-700">
-          <label class="block text-[11px] text-slate-300 mb-1">Upload Subscribe Screenshot:</label>
-          <input type="file" id="ytFile" accept="image/*" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[11px] file:bg-slate-700 file:text-white" />
-          <button onclick="submitManualTask('YouTube')" class="mt-2 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs py-1.5 rounded-lg">
-            Submit Screenshot
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 4. LEADERBOARD TAB -->
-    <div id="tab-leaderboard" class="hidden space-y-4">
-      <div class="bg-gradient-to-tr from-amber-600 to-yellow-500 rounded-2xl p-4 text-slate-950 shadow-lg">
-        <div class="flex justify-between items-center">
-          <div>
-            <span class="text-[10px] uppercase font-black tracking-widest bg-slate-950/20 px-2 py-0.5 rounded">24H Competition</span>
-            <h3 class="text-xl font-black mt-1">Daily Top Ranker</h3>
-            <p class="text-xs font-semibold">Prize: ₹50.00 (5,000 Coins)</p>
-          </div>
-          <span class="text-4xl">👑</span>
-        </div>
-      </div>
-
-      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-3 space-y-2 text-xs">
-        <div class="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-amber-500/40">
-          <span class="font-bold text-amber-400">#1 Vikram_S</span>
-          <span class="font-black text-amber-300">2,840 Coins</span>
-        </div>
-        <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl">
-          <span class="font-bold text-slate-300">#2 AmitKumar99</span>
-          <span class="font-bold text-slate-200">2,150 Coins</span>
-        </div>
-        <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl">
-          <span class="font-bold text-slate-300">#3 Rahul_B</span>
-          <span class="font-bold text-slate-200">1,920 Coins</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 5. CASHOUT TAB -->
-    <div id="tab-withdraw" class="hidden space-y-4">
-      <div class="bg-slate-800/60 border border-slate-700/80 rounded-2xl p-4">
-        <h3 class="font-bold text-sm text-slate-100 mb-2">Select Payout Method</h3>
-        <div class="grid grid-cols-3 gap-2 mb-4">
-          <button onclick="setPayoutMethod('UPI')" id="method-UPI" class="p-2.5 rounded-xl border border-emerald-500 bg-slate-900 text-center font-bold text-xs text-white">
-            UPI
-          </button>
-          <button onclick="setPayoutMethod('PlayStore')" id="method-PlayStore" class="p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 text-center font-bold text-xs text-slate-400">
-            Play Store
-          </button>
-          <button onclick="setPayoutMethod('Amazon')" id="method-Amazon" class="p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 text-center font-bold text-xs text-slate-400">
-            Amazon
-          </button>
-        </div>
-
-        <div class="space-y-3">
-          <div>
-            <label class="block text-[11px] text-slate-300 mb-1" id="payoutInputLabel">Enter UPI ID (e.g. mobile@paytm):</label>
-            <input type="text" id="payoutAccount" placeholder="name@bank / email" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
-          </div>
-
-          <div>
-            <label class="block text-[11px] text-slate-300 mb-1">Select Amount:</label>
-            <select id="payoutAmountSelect" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
-              <option value="1000">1,000 Coins (₹10.00)</option>
-              <option value="2500">2,500 Coins (₹25.00)</option>
-              <option value="5000">5,000 Coins (₹50.00)</option>
-            </select>
-          </div>
-
-          <button onclick="handlePayoutSubmit()" class="w-full mt-2 bg-emerald-600 text-white font-black text-xs py-3.5 rounded-xl shadow-lg">
-            Submit Cashout
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Alert Box -->
-    <div id="toastBox" class="fixed bottom-24 left-4 right-4 p-3 rounded-xl text-center text-xs font-semibold hidden z-50 shadow-2xl"></div>
-
+    </section>
   </main>
 
-  <!-- BOTTOM BAR -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 border-t border-slate-800 p-2 flex justify-around items-center z-40 backdrop-blur-md">
-    <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-blue-400 text-[10px] font-bold">
-      <span class="text-base">🏠</span> Home
-    </button>
-    <button onclick="switchTab('games')" id="nav-games" class="flex flex-col items-center text-slate-400 text-[10px] font-bold">
-      <span class="text-base">🎡</span> Tasks
-    </button>
-    <button onclick="switchTab('social')" id="nav-social" class="flex flex-col items-center text-slate-400 text-[10px] font-bold">
-      <span class="text-base">📢</span> Social
-    </button>
-    <button onclick="switchTab('leaderboard')" id="nav-leaderboard" class="flex flex-col items-center text-slate-400 text-[10px] font-bold">
-      <span class="text-base">🏆</span> Top 1
-    </button>
-    <button onclick="switchTab('withdraw')" id="nav-withdraw" class="flex flex-col items-center text-slate-400 text-[10px] font-bold">
-      <span class="text-base">💳</span> Cashout
-    </button>
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur border-t border-slate-800 flex justify-around py-2 max-w-md mx-auto">
+    <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center gap-1 text-emerald-400" data-tab="home"><span class="text-base">🏠</span><span class="text-[10px]">Home</span></button>
+    <button onclick="switchTab('tasks')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="tasks"><span class="text-base">📋</span><span class="text-[10px]">Tasks</span></button>
+    <button onclick="switchTab('arcade')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="arcade"><span class="text-base">🎮</span><span class="text-[10px]">Arcade</span></button>
+    <button onclick="switchTab('refer')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="refer"><span class="text-base">👥</span><span class="text-[10px]">Refer</span></button>
+    <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center gap-1 text-slate-400" data-tab="wallet"><span class="text-base">💳</span><span class="text-[10px]">Wallet</span></button>
   </nav>
+    <script>
+    let tgUser = null;
+    try {
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.expand();
+        tgUser = window.Telegram.WebApp.initDataUnsafe?.user;
+      }
+    } catch (e) {}
 
-  <script>
-    // 1. TELEGRAM SDK INIT
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      try {
-        tg.ready();
-        tg.expand();
-        if (tg.initDataUnsafe?.user?.first_name) {
-          document.getElementById('userName').innerText = tg.initDataUnsafe.user.first_name;
-        }
-      } catch(e) { console.log(e); }
-    }
-    
-        // 2. ADSGRAM INTEGRATION (Bypassed - Waiting for Active status)
-let AdController = null;
+    const USER_ID = tgUser?.id || '7504650333';
+    const USER_NAME = tgUser?.first_name ? `${tgUser.first_name} ${tgUser.last_name || ''}`.trim() : 'Abhitosh Patel';
 
+    document.getElementById('userName').innerText = USER_NAME;
+    document.getElementById('userId').innerText = USER_ID;
+    document.getElementById('refLinkDisplay').innerText = `https://t.me/RozgarPayBot?start=${USER_ID}`;
 
-    // 3. STORAGE & STATE
-    const COIN_RATE = 0.01;
-    let coins = parseInt(localStorage.getItem('user_coins') || '0');
-    let adsCount = parseInt(localStorage.getItem('daily_ads_count') || '0');
-    let spinLeft = parseInt(localStorage.getItem('spin_left') || '5');
-    let scratchLeft = parseInt(localStorage.getItem('scratch_left') || '5');
-    let quizLeft = parseInt(localStorage.getItem('quiz_left') || '10');
-    let lastClaimDate = localStorage.getItem('last_bonus_date') || '';
-    let currentPayoutMethod = 'UPI';
+    let coins = parseInt(localStorage.getItem('rp_coins') || '250');
+    let adsWatched = parseInt(localStorage.getItem('rp_ads_watched') || '0');
+    let spinsLeft = parseInt(localStorage.getItem('rp_spins_left') || '5');
+    let scratchLeft = parseInt(localStorage.getItem('rp_scratch_left') || '5');
+    let selectedMethod = 'UPI';
 
-    updateWalletDisplay();
-    generateMathQuiz();
+    function syncUI() {
+      const rupees = (coins / 100).toFixed(2);
+      document.getElementById('coinBalance').innerText = coins;
+      document.getElementById('rupeeBalance').innerText = rupees;
+      document.getElementById('walletCoins').innerText = coins;
+      document.getElementById('walletRupee').innerText = rupees;
+      document.getElementById('metricAds').innerText = adsWatched;
+      document.getElementById('spinsCount').innerText = spinsLeft;
+      document.getElementById('scratchCount').innerText = scratchLeft;
 
-    function updateWalletDisplay() {
-      document.getElementById('userBalance').innerText = coins;
-      document.getElementById('rupeeEquiv').innerText = `≈ ₹${(coins * COIN_RATE).toFixed(2)}`;
-      
-      const progressPercent = Math.min(100, (adsCount / 300) * 100);
-      document.getElementById('adProgressBar').style.width = `${progressPercent}%`;
-      document.getElementById('adProgressText').innerText = `Ads Watched: ${adsCount} / 300`;
+      updateMilestone(5, 50, 'btn-m5');
+      updateMilestone(10, 120, 'btn-m10');
 
-      localStorage.setItem('user_coins', coins);
-      localStorage.setItem('daily_ads_count', adsCount);
+      localStorage.setItem('rp_coins', coins);
+      localStorage.setItem('rp_ads_watched', adsWatched);
+      localStorage.setItem('rp_spins_left', spinsLeft);
+      localStorage.setItem('rp_scratch_left', scratchLeft);
     }
 
-    function showNotice(msg, isSuccess = true) {
+    function showToast(msg) {
       const box = document.getElementById('toastBox');
-      box.className = `fixed bottom-24 left-4 right-4 p-3 rounded-xl text-center text-xs font-semibold z-50 shadow-2xl ${isSuccess ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-rose-950 text-rose-300 border border-rose-800'}`;
-      box.innerText = msg;
-      box.classList.remove('hidden');
-      setTimeout(() => { box.classList.add('hidden'); }, 3000);
-    }
-
-    // BULLETPROOF AD TRIGGER: Ad agar error de tab bhi function nahi rukega
-    function executeVideoAd(onSuccess) {
-      showNotice("Loading sponsor ad...", true);
-      if (AdController && typeof AdController.show === 'function') {
-        AdController.show().then(() => {
-          onSuccess();
-        }).catch((err) => {
-          console.warn("Ad unavailable/moderation. Executing reward fallback:", err);
-          onSuccess(); // Unblocks button action if ad is pending approval
-        });
-      } else {
-        onSuccess();
-      }
-    }
-
-    // ACTIONS
-    function handleUnlimitedAd() {
-      executeVideoAd(() => {
-        coins += 10;
-        adsCount += 1;
-        if (adsCount === 300) {
-          coins += 1000;
-          showNotice("🎉 300 Ads Milestone Reached! +1,000 Coins (₹10) credited!");
-        } else {
-          showNotice("🎉 +10 Coins (₹0.10) added to wallet!");
-        }
-        updateWalletDisplay();
-      });
-    }
-
-    function handleDailyBonus() {
-      const today = new Date().toDateString();
-      if (lastClaimDate === today) {
-        showNotice("⚠️ Daily bonus already claimed today!", false);
-        return;
-      }
-      executeVideoAd(() => {
-        coins += 50;
-        lastClaimDate = today;
-        localStorage.setItem('last_bonus_date', today);
-        updateWalletDisplay();
-        showNotice("🎁 Daily bonus: +50 Coins (₹0.50) added!");
-      });
-    }
-
-    function playSpinWheel() {
-      if (spinLeft <= 0) {
-        showNotice("⚠️ Daily spin limit finished (5/5).", false);
-        return;
-      }
-      const prizeCoins = [5, 8, 10, 15, 20][Math.floor(Math.random() * 5)];
-      executeVideoAd(() => {
-        spinLeft -= 1;
-        coins += prizeCoins;
-        localStorage.setItem('spin_left', spinLeft);
-        document.getElementById('spinLeftText').innerText = `${spinLeft} Left`;
-        updateWalletDisplay();
-        showNotice(`🎡 You won +${prizeCoins} Coins!`);
-      });
-    }
-
-    function playScratchCard() {
-      if (scratchLeft <= 0) {
-        showNotice("⚠️ Daily scratch limit finished (5/5).", false);
-        return;
-      }
-      const prizeCoins = [5, 10, 15, 20, 25][Math.floor(Math.random() * 5)];
-      executeVideoAd(() => {
-        scratchLeft -= 1;
-        coins += prizeCoins;
-        localStorage.setItem('scratch_left', scratchLeft);
-        document.getElementById('scratchLeftText').innerText = `${scratchLeft} Left`;
-        updateWalletDisplay();
-        showNotice(`🎴 You won +${prizeCoins} Coins!`);
-      });
-    }
-
-    // MATH QUIZ
-    let currentAnswer = 0;
-    function generateMathQuiz() {
-      const n1 = Math.floor(Math.random() * 15) + 1;
-      const n2 = Math.floor(Math.random() * 15) + 1;
-      currentAnswer = n1 + n2;
-      document.getElementById('quizQuestion').innerText = `${n1} + ${n2} = ?`;
-
-      const options = [currentAnswer, currentAnswer + 2, Math.max(1, currentAnswer - 3), currentAnswer + 5];
-      options.sort(() => Math.random() - 0.5);
-
-      const container = document.getElementById('quizOptions');
-      container.innerHTML = '';
-      options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = "bg-slate-800 py-2.5 rounded-xl text-xs font-bold text-white border border-slate-700 active:bg-slate-700";
-        btn.innerText = opt;
-        btn.onclick = () => submitQuizAnswer(opt);
-        container.appendChild(btn);
-      });
-    }
-
-    function submitQuizAnswer(selected) {
-      if (quizLeft <= 0) {
-        showNotice("⚠️ Daily quiz limit reached (10/10).", false);
-        return;
-      }
-      if (selected === currentAnswer) {
-        executeVideoAd(() => {
-          quizLeft -= 1;
-          coins += 5;
-          localStorage.setItem('quiz_left', quizLeft);
-          document.getElementById('quizLeftText').innerText = `${quizLeft} Left`;
-          updateWalletDisplay();
-          showNotice("✅ Correct answer! +5 Coins added.");
-          generateMathQuiz();
-        });
-      } else {
-        showNotice("❌ Wrong answer. Try next.", false);
-        generateMathQuiz();
-      }
-    }
-
-    // TELEGRAM AUTO TASK
-    function verifyTelegramTask() {
-      const btn = document.getElementById('tgTaskBtn');
-      btn.innerText = "Verifying...";
-      window.open('https://t.me/DailyfreeRozgar', '_blank');
+      document.getElementById('toastMsg').innerText = msg;
+      box.classList.remove('opacity-0', '-translate-y-2');
+      box.classList.add('opacity-100', 'translate-y-0');
       setTimeout(() => {
-        coins += 60;
-        updateWalletDisplay();
-        btn.className = "bg-emerald-800 text-emerald-300 font-bold text-xs px-3 py-2 rounded-xl";
-        btn.innerText = "Completed ✅";
-        btn.disabled = true;
-        showNotice("🎉 Telegram verified! +60 Coins credited.");
+        box.classList.add('opacity-0', '-translate-y-2');
+        box.classList.remove('opacity-100', 'translate-y-0');
+      }, 2500);
+    }
+
+    function switchTab(tabId) {
+      ['home', 'tasks', 'arcade', 'refer', 'wallet'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+      });
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabId) {
+          btn.classList.remove('text-slate-400');
+          btn.classList.add('text-emerald-400');
+        } else {
+          btn.classList.add('text-slate-400');
+          btn.classList.remove('text-emerald-400');
+        }
+      });
+
+      if (tabId === 'arcade') {
+        drawWheel();
+        initScratchCard();
+      }
+    }
+
+    function claimDailyBonus() {
+      const lastClaim = localStorage.getItem('rp_last_daily');
+      const today = new Date().toDateString();
+      if (lastClaim === today) {
+        showToast('⚠️ Daily bonus already claimed today!');
+        return;
+      }
+      coins += 50;
+      localStorage.setItem('rp_last_daily', today);
+      syncUI();
+      showToast('🎁 Claimed 50 Daily Coins!');
+    }
+
+    function watchVideoAd() {
+      const btn = document.getElementById('watchAdBtn');
+      const notice = document.getElementById('adCooldownNotice');
+      const timer = document.getElementById('adTimer');
+
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+      showToast('📺 Playing Advertisement...');
+
+      setTimeout(() => {
+        coins += 20;
+        adsWatched += 1;
+        syncUI();
+        showToast('✓ Ad finished! +20 Coins received.');
+
+        notice.classList.remove('hidden');
+        let remaining = 20;
+        timer.innerText = remaining;
+
+        const interval = setInterval(() => {
+          remaining--;
+          timer.innerText = remaining;
+          if (remaining <= 0) {
+            clearInterval(interval);
+            notice.classList.add('hidden');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50');
+          }
+        }, 1000);
       }, 3000);
     }
 
-    function submitManualTask(platform) {
-      const fileInput = document.getElementById('ytFile');
-      if (!fileInput.files || fileInput.files.length === 0) {
-        showNotice("⚠️ Please select screenshot first.", false);
-        return;
+    function updateMilestone(target, reward, btnId) {
+      const btn = document.getElementById(btnId);
+      const claimedKey = `rp_claimed_m_${target}`;
+      if (localStorage.getItem(claimedKey)) {
+        btn.innerText = 'Claimed ✓';
+        btn.disabled = true;
+        btn.className = 'bg-slate-800 text-emerald-400 text-xs px-3 py-1.5 rounded-lg font-bold border border-slate-700';
+      } else if (adsWatched >= target) {
+        btn.innerText = 'Claim';
+        btn.disabled = false;
+        btn.className = 'bg-emerald-500 text-slate-950 text-xs px-3 py-1.5 rounded-lg font-bold active:scale-95';
+      } else {
+        btn.innerText = `${adsWatched}/${target}`;
+        btn.disabled = true;
       }
-      showNotice(`✅ ${platform} screenshot submitted for verification!`);
-      fileInput.value = '';
     }
 
-    function shareReferralLink() {
-      const userRefId = tg?.initDataUnsafe?.user?.id || "user" + Math.floor(Math.random() * 1000);
-      const botUrl = `https://t.me/share/url?url=https://t.me/DailyfreeRozgar?start=ref_${userRefId}&text=Join Rozgar Pay and earn real cash daily!`;
-      window.open(botUrl, '_blank');
+    function claimMilestone(target, reward) {
+      coins += reward;
+      localStorage.setItem(`rp_claimed_m_${target}`, 'true');
+      syncUI();
+      showToast(`🎉 Milestone reached! +${reward} Coins!`);
     }
 
-    function setPayoutMethod(method) {
-      currentPayoutMethod = method;
-      ['UPI', 'PlayStore', 'Amazon'].forEach(m => {
-        const btn = document.getElementById(`method-${m}`);
-        if (m === method) {
-          btn.className = "p-2.5 rounded-xl border border-emerald-500 bg-slate-900 text-center font-bold text-xs text-white";
+    const wheelSegments = [10, 50, 0, 25, 100, 15];
+    const segmentColors = ['#0f766e', '#0369a1', '#475569', '#d97706', '#15803d', '#9333ea'];
+    let wheelAngle = 0;
+    let isSpinning = false;
+
+    function drawWheel() {
+      const canvas = document.getElementById('wheelCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const arc = (2 * Math.PI) / wheelSegments.length;
+
+      ctx.clearRect(0, 0, 250, 250);
+      ctx.save();
+      ctx.translate(125, 125);
+      ctx.rotate(wheelAngle);
+
+      for (let i = 0; i < wheelSegments.length; i++) {
+        ctx.beginPath();
+        ctx.fillStyle = segmentColors[i];
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, 120, i * arc, (i + 1) * arc);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 14px system-ui';
+        ctx.textAlign = 'right';
+        ctx.rotate((i + 0.5) * arc);
+        ctx.fillText(`${wheelSegments[i]} C`, 105, 5);
+        ctx.restore();
+      }
+
+      ctx.beginPath();
+      ctx.arc(0, 0, 16, 0, 2 * Math.PI);
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function spinWheel() {
+      if (isSpinning || spinsLeft <= 0) return;
+      isSpinning = true;
+      spinsLeft--;
+      syncUI();
+
+      const chosenIndex = Math.floor(Math.random() * wheelSegments.length);
+      const arc = (2 * Math.PI) / wheelSegments.length;
+      const targetAngle = (3 * Math.PI / 2) - (chosenIndex * arc + arc / 2) + (Math.PI * 10);
+
+      let currentStep = 0;
+      const totalSteps = 120;
+      const startAngle = wheelAngle % (2 * Math.PI);
+
+      function animate() {
+        currentStep++;
+        const progress = currentStep / totalSteps;
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        wheelAngle = startAngle + (targetAngle - startAngle) * easeOut;
+        drawWheel();
+
+        if (currentStep < totalSteps) {
+          requestAnimationFrame(animate);
         } else {
-          btn.className = "p-2.5 rounded-xl border border-slate-700 bg-slate-900/50 text-center font-bold text-xs text-slate-400";
+          isSpinning = false;
+          const prize = wheelSegments[chosenIndex];
+          coins += prize;
+          syncUI();
+          showToast(`🎡 Won ${prize} Coins!`);
         }
-      });
-      document.getElementById('payoutInputLabel').innerText = method === 'UPI' 
-        ? "Enter UPI ID (e.g. mobile@paytm):" 
-        : "Enter Email Address for Gift Card:";
+      }
+      requestAnimationFrame(animate);
     }
 
-    function handlePayoutSubmit() {
-      const target = document.getElementById('payoutAccount').value.trim();
-      const neededCoins = parseInt(document.getElementById('payoutAmountSelect').value);
+    let scratchPrize = 25;
+    function initScratchCard() {
+      const canvas = document.getElementById('scratchCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
 
-      if (!target) {
-        showNotice("⚠️ Enter valid recipient details.", false);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(0, 0, 256, 128);
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('RUB FINGER HERE', 128, 68);
+
+      let isDrawing = false;
+      function scratch(e) {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(clientX - rect.left, clientY - rect.top, 16, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      canvas.onmousedown = () => isDrawing = true;
+      canvas.onmouseup = () => isDrawing = false;
+      canvas.onmousemove = scratch;
+      canvas.ontouchstart = () => isDrawing = true;
+      canvas.ontouchend = () => isDrawing = false;
+      canvas.ontouchmove = scratch;
+    }
+
+    function resetScratchCard() {
+      if (scratchLeft <= 0) {
+        showToast('⚠️ No scratch cards left!');
         return;
       }
-      if (coins < neededCoins) {
-        showNotice(`⚠️ Need at least ${neededCoins} Coins to withdraw.`, false);
+      scratchLeft--;
+      scratchPrize = [10, 20, 30, 50][Math.floor(Math.random() * 4)];
+      document.getElementById('scratchPrizeLabel').innerText = `+${scratchPrize} COINS!`;
+      coins += scratchPrize;
+      syncUI();
+      initScratchCard();
+      showToast(`✨ Scratch Card ready! (+${scratchPrize} Coins)`);
+    }
+
+    function copyReferralLink() {
+      navigator.clipboard.writeText(`https://t.me/RozgarPayBot?start=${USER_ID}`);
+      showToast('📋 Referral Link Copied!');
+    }
+
+    function shareOnTelegram() {
+      const link = encodeURIComponent(`https://t.me/RozgarPayBot?start=${USER_ID}`);
+      window.open(`https://t.me/share/url?url=${link}&text=${encodeURIComponent('Earn real cash daily on Rozgar Pay!')}`, '_blank');
+    }
+
+    function selectPayoutMethod(method) {
+      selectedMethod = method;
+      document.querySelectorAll('.method-btn').forEach(b => {
+        b.className = 'method-btn py-2 px-3 bg-slate-800 text-slate-400 border border-slate-700 rounded-xl text-xs font-bold text-center';
+      });
+      document.getElementById(`method-${method}`).className = 'method-btn py-2 px-3 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold text-center';
+    }
+
+    async function submitCashoutRequest() {
+      const address = document.getElementById('payoutAddress').value.trim();
+      const amount = parseInt(document.getElementById('payoutAmount').value);
+      const coinsNeeded = amount * 100;
+      const btn = document.getElementById('withdrawBtn');
+
+      if (!address) {
+        showToast('⚠️ Enter UPI or Phone Number!');
+        return;
+      }
+      if (coins < coinsNeeded) {
+        showToast(`⚠️ Need ${coinsNeeded} coins!`);
         return;
       }
 
-      executeVideoAd(() => {
-        const inrValue = (neededCoins * COIN_RATE).toFixed(2);
-              sendCashoutToAdmin({
-        name: (tg?.initDataUnsafe?.user?.first_name || "Unknown"),
-        userId: (tg?.initDataUnsafe?.user?.id || "N/A"),
-        amount: inrValue,
-        coins: neededCoins,
-        method: currentPayoutMethod,
-        account: target
-      });
+      btn.disabled = true;
+      btn.innerText = 'Submitting...';
 
-        coins -= neededCoins;
-        updateWalletDisplay();
-        showNotice(`✅ ₹${inrValue} payout request submitted!`);
-        document.getElementById('payoutAccount').value = '';
-      });
+      const payload = {
+        title: 'NEW CASHOUT REQUEST!',
+        userId: `${USER_NAME} (${USER_ID})`,
+        amount: amount,
+        coins: coinsNeeded,
+        method: selectedMethod,
+        upiId: address,
+        date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+      };
+
+      try {
+        const res = await fetch('/api/admin-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          coins -= coinsNeeded;
+          syncUI();
+          showToast('✓ Request Sent! Logged to Channel.');
+          document.getElementById('payoutAddress').value = '';
+        } else {
+          showToast(`❌ Error: ${data.error || 'Failed'}`);
+        }
+      } catch (err) {
+        showToast('❌ Network error!');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Submit Cashout Request';
+      }
     }
 
-    // TAB SWITCHER
-    function switchTab(tabId) {
-      ['home', 'games', 'social', 'leaderboard', 'withdraw'].forEach(id => {
-        const el = document.getElementById(`tab-${id}`);
-        const nav = document.getElementById(`nav-${id}`);
-        if (el) el.classList.add('hidden');
-        if (nav) nav.className = "flex flex-col items-center text-slate-400 text-[10px] font-bold";
-      });
-      const targetTab = document.getElementById(`tab-${tabId}`);
-      const targetNav = document.getElementById(`nav-${tabId}`);
-      if (targetTab) targetTab.classList.remove('hidden');
-      if (targetNav) targetNav.className = "flex flex-col items-center text-blue-400 text-[10px] font-bold";
-    }
-    // ADMIN CASHOUT ALERT SYSTEM
-function sendCashoutToAdmin(details) {
-  fetch("/api/payout-alert", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name: details.name || "Unknown",
-      userId: details.userId || "N/A",
-      amount: details.amount,
-      coins: details.coins,
-      method: details.method,
-      account: details.account
-    })
-  }).catch(e => console.error("Admin alert error:", e));
-}
+    syncUI();
   </script>
 </body>
 </html>
